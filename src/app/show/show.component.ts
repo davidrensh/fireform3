@@ -8,6 +8,8 @@ import { COMPILER_PROVIDERS } from '@angular/compiler';
 import { IHaveDynamicData, DynamicTypeBuilder } from '../dynamic/type.builder';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
+import { ActivatedRoute} from '@angular/router';
+
 @Component({
   selector: 'app-show',
   template: `
@@ -20,14 +22,14 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 `,
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
 })
-export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
+export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
   // reference for a <div> with #dynamicContentPlaceHolder
   @ViewChild('dynamicContentPlaceHolder', { read: ViewContainerRef })
   protected dynamicComponentTarget: ViewContainerRef;
   //data: any ={};
   // this will be reference to dynamic content - to be able to destroy it
   protected componentRef: ComponentRef<IHaveDynamicData>;
-
+  private sub: any;
   // until ngAfterViewInit, we cannot start (firstly) to process dynamic stuff
   protected wasViewInitialized = false;
 
@@ -36,19 +38,47 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
   protected data = {};// { namea: "ABC123",nameb: "A description of this Entity" };
   static namelist: string[] = [];
   static html: string;
-
+  static formname: string = "f02";
   // wee need Dynamic component builder
-  constructor(protected typeBuilder: DynamicTypeBuilder, public af: AngularFire) {
-    let formname: string = "f01";
+  constructor(protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
+    //let formname: string = "f01";
 
-    this.af.database.object("/forms/" + formname).subscribe(res => {
-      if (res) {
-        let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
-        //console.log("html=" + convertedHtml);
-        ShowComponent.html = convertedHtml;
+    // if (ShowComponent.formname == "f01") console.log("Correct!!");
+    // this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
+    //   if (res && res.contenthtml) {
+    //     let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
+    //     //console.log("html=" + convertedHtml);
+    //     ShowComponent.html = convertedHtml;
+    //   }
+    // }
+    // );
+
+  }
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      console.log("pppp:" + params['id']);
+      ShowComponent.formname = params['id']; // (+) converts string 'id' to a number
+      this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
+        if (res && res.contenthtml) {
+          let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
+          //console.log("html=" + convertedHtml);
+          ShowComponent.html = convertedHtml;
+        }
       }
-    }
-    );
+      );
+      // In a real app: dispatch action to load the details here.
+    });
+    // setTimeout(() => {
+    //   if (ShowComponent.formname == "f01") console.log("Correct!!");
+    //   this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
+    //     if (res && res.contenthtml) {
+    //       let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
+    //       //console.log("html=" + convertedHtml);
+    //       ShowComponent.html = convertedHtml;
+    //     }
+    //   }
+    //   );
+    // }, 1000);
   }
 
   saveData() {
@@ -129,6 +159,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.refreshContent();
   }
   public ngOnDestroy() {
+    this.sub.unsubscribe();
     if (this.componentRef) {
       this.componentRef.destroy();
       this.componentRef = null;
