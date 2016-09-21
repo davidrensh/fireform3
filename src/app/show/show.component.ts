@@ -43,17 +43,21 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.af.database.object("/forms/" + formname).subscribe(res => {
       if (res) {
         let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
-        console.log("html=" + convertedHtml);
+        //console.log("html=" + convertedHtml);
         ShowComponent.html = convertedHtml;
       }
     }
     );
   }
 
-  /** Get a Factory and create a component */
   saveData() {
-    console.log("data=" + JSON.stringify(this.data));
-
+    console.log("data=" + this.data['aa'] + JSON.stringify(this.data));
+    let formname: string = "f01";
+    this.af.database.object("/forms/" + formname + "/data/aa").update({
+      varname: "aa",
+      value:  this.data['aa'],
+      updateddate: (new Date()).toISOString().substr(0, 10)
+    });
   }
   ConvertToNg2Template(src: string): string {
     return this.ConvertInputTextBox(src);
@@ -77,7 +81,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     //var template = `<p><input maxlength="11" [(ngModel)]="data['aa']" size="11" /></p>`;// this.templateBuilder.prepareTemplate(this.entity, useTextarea);
     var template = ShowComponent.html;
-    console.log("template=" + template);
+    //console.log("template=" + template);
     // this.entity.push('namea','100');
     // this.entity.push('nameb','200');            
     // here we get Factory (just compiled or from cache)
