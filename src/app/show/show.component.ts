@@ -12,8 +12,7 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
   selector: 'app-show',
   template: `
 <div>
-  check/uncheck to use INPUT vs TEXTAREA:
-  <input type="checkbox" #val (click)="refreshContent(val.checked)" /><hr />
+  <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
   <div #dynamicContentPlaceHolder></div>  <hr />
   data: <pre>{{data | json}}</pre>
