@@ -1,4 +1,4 @@
-  //import { Component } from '@angular/core';
+//import { Component } from '@angular/core';
 import { Component, ComponentRef, ViewChild, ViewContainerRef}   from '@angular/core';
 import { AfterViewInit, OnInit, OnDestroy}          from '@angular/core';
 import { OnChanges, SimpleChange, ComponentFactory} from '@angular/core';
@@ -34,6 +34,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
   // example entity ... to be recieved from other app parts
   // this is kind of candiate for @Input
   protected data = {};// { namea: "ABC123",nameb: "A description of this Entity" };
+  static namelist: string[] = [];
   static html: string;
 
   // wee need Dynamic component builder
@@ -51,13 +52,20 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   saveData() {
-    console.log("data=" + this.data['aa'] + JSON.stringify(this.data));
+    //console.log("data=" + this.data['aa'] + JSON.stringify(this.data));
     let formname: string = "f01";
-    this.af.database.object("/forms/" + formname + "/data/aa").update({
-      varname: "aa",
-      value:  this.data['aa'],
-      updateddate: (new Date()).toISOString().substr(0, 10)
-    });
+    if (ShowComponent.namelist !== undefined) {
+      console.log("namelist=" + ShowComponent.namelist + ShowComponent.namelist.length);//this.data['aa'] + JSON.stringify(this.data));
+      for (var i = 0; i < ShowComponent.namelist.length; i++) {
+        let n = ShowComponent.namelist[i];
+        console.log("name:" + n + "data=" + this.data[n]);
+        this.af.database.object("/forms/" + formname + "/data/" + n).update({
+          varname: n,
+          value: this.data[n],
+          updateddate: (new Date()).toISOString().substr(0, 10)
+        });
+      }
+    }
   }
   ConvertToNg2Template(src: string): string {
     return this.ConvertInputTextBox(src);
@@ -65,6 +73,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
   ConvertInputTextBox(src: string): string {
     //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
     var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")/, function (match, prefix, handler, name, suffix, suffix2) {
+      if (ShowComponent.namelist !== undefined) { ShowComponent.namelist.push(name); }
       return prefix + '[(ngModel)]="data[\'' + name + '\']' + suffix;
     });
     return p2;
@@ -74,7 +83,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this.componentRef) {
       this.componentRef.destroy();
     }
-   
+
     if (ShowComponent.html == undefined) return;
     // here we get a TEMPLATE with dynamic content === TODO
     //var template = this.templateBuilder.prepareTemplate(this.entity, useTextarea);
