@@ -67,18 +67,25 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       }
       );
       // In a real app: dispatch action to load the details here.
+      setTimeout(() => {
+
+        if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
+          //console.log("html2:" + ShowComponent.html);
+          this.af.database.list("/forms/" + ShowComponent.formname + "/data").subscribe(items => {
+            console.log("items:" +JSON.stringify(items));
+            items.map(item => {
+              console.log("item:" + item.varname + item.value);
+              this.data[item.varname] = item.value;
+              console.log("data:" +JSON.stringify(this.data));
+              //item.metadata = this.af.database.object('/items_meta/' + item.$key);
+            });
+            //return items;
+          }
+          );
+        }
+      }, 1000);
     });
-    // setTimeout(() => {
-    //   if (ShowComponent.formname == "f01") console.log("Correct!!");
-    //   this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
-    //     if (res && res.contenthtml) {
-    //       let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
-    //       //console.log("html=" + convertedHtml);
-    //       ShowComponent.html = convertedHtml;
-    //     }
-    //   }
-    //   );
-    // }, 1000);
+
   }
 
   saveData() {
