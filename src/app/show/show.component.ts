@@ -61,7 +61,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
-          //console.log("html=" + convertedHtml);
+          console.log("html=" + convertedHtml);
           ShowComponent.html = convertedHtml;
         }
       }
@@ -72,11 +72,11 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
           //console.log("html2:" + ShowComponent.html);
           this.af.database.list("/forms/" + ShowComponent.formname + "/data").subscribe(items => {
-            console.log("items:" +JSON.stringify(items));
+            console.log("items:" + JSON.stringify(items));
             items.map(item => {
               console.log("item:" + item.varname + item.value);
               this.data[item.varname] = item.value;
-              console.log("data:" +JSON.stringify(this.data));
+              console.log("data:" + JSON.stringify(this.data));
               //item.metadata = this.af.database.object('/items_meta/' + item.$key);
             });
             //return items;
@@ -105,13 +105,54 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     }
   }
   ConvertToNg2Template(src: string): string {
-    return this.ConvertInputTextBox(src);
+    let s = this.ConvertInputTextBox(src);
+    s = this.ConvertTextarea(s);
+    s = this.ConvertCheckBox(s);
+    s = this.ConvertRadio(s);
+    //s = this.ConvertDropdown(s);
+    //s = this.ConvertTable(s);
+
+    return s;
   }
   ConvertInputTextBox(src: string): string {
     //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
-    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")/, function (match, prefix, handler, name, suffix, suffix2) {
-      if (ShowComponent.namelist !== undefined) { ShowComponent.namelist.push(name); }
-      return prefix + '[(ngModel)]="data[\'' + name + '\']' + suffix;
+    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix3;
+    });
+    return p2;
+  }
+  ConvertTextarea(src: string): string {
+    //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
+    var p2 = src.replace(/(textarea.+)(name=")(.+?)(".+)/g, function (match, prefix, handler, name, suffix) {
+      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix;
+    });
+    return p2;
+  }
+  ConvertCheckBox(src: string): string {
+    //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
+    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="checkbox")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix2 + suffix3;
+    });
+    return p2;
+  }
+  ConvertDropdown(src: string): string {
+    //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
+    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix3;
+    });
+    return p2;
+  }
+  ConvertTable(src: string): string {
+    //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
+    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix3;
+    });
+    return p2;
+  }
+  ConvertRadio(src: string): string {
+    //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
+    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="radio")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix2 + suffix3;
     });
     return p2;
   }
