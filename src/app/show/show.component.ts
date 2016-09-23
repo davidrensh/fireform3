@@ -87,7 +87,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     s = this.ConvertTextarea(s);
     s = this.ConvertCheckBox(s);
     s = this.ConvertRadio(s);
-    //s = this.ConvertDropdown(s);
+    s = this.ConvertDropdown(s);
     //s = this.ConvertTable(s);
 
     return s;
@@ -110,7 +110,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
       return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
     });
-    var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    var p2 = p.replace(/(<\s*textarea\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
       if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
 
       return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
@@ -133,10 +133,15 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
 
   ConvertDropdown(src: string): string {
-    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
-      if (ShowComponent.namelist.indexOf(name) < 0) ShowComponent.namelist.push(name);
+    var p = src.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*.+?)/g, function (match, a, b, c) {
+      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
 
-      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix3;
+      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    });
+    var p2 = p.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
+
+      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
     });
     return p2;
   }
