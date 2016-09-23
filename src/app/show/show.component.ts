@@ -116,8 +116,15 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   }
   ConvertInputTextBox(src: string): string {
     //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
-    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
-      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix3;
+    // var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+    //   return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix3;
+    // });
+
+    var p = src.replace(/(<\s*input\s*\w*\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="text".+?)/g, function (match, a, b, c) {
+      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    });
+    var p2 = p.replace(/(<\s*input\s*\w*\s*type="text")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
     });
     return p2;
   }
@@ -126,15 +133,33 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var p2 = src.replace(/(textarea.+)(name=")(.+?)(".+)/g, function (match, prefix, handler, name, suffix) {
       return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix;
     });
+    var p2 = src.replace(/(<\s*textarea\s*\w*\s*name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c) {
+      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    });
+
+        var p = src.replace(/(<\s*textarea\s*\w*\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="checkbox".+?)/g, function (match, a, b, c) {
+      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    });
+    var p2 = p.replace(/(<\s*input\s*\w*\s*type="checkbox")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
+    });
     return p2;
   }
   ConvertCheckBox(src: string): string {
     //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
-    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="checkbox")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
-      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix2 + suffix3;
+    // var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="checkbox")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+    //   return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix2 + suffix3;
+    // });
+    var p = src.replace(/(<\s*input\s*\w*\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="checkbox".+?)/g, function (match, a, b, c) {
+      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    });
+    var p2 = p.replace(/(<\s*input\s*\w*\s*type="checkbox")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
     });
     return p2;
   }
+
+
   ConvertDropdown(src: string): string {
     //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
     var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
@@ -151,8 +176,15 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   }
   ConvertRadio(src: string): string {
     //var src = '<input maxlength="11" name="aa" size="11" type="text" value="aa" />';
-    var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="radio")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
-      return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix2 + suffix3;
+    // var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="radio")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
+    //   return prefix + handler.replace(/name="/g, '[(ngModel)]="data[\'') + name + '\']' + suffix + suffix2 + suffix3;
+    // });
+
+    var p = src.replace(/(<\s*input\s*\w*\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="radio".+?)/g, function (match, a, b, c) {
+      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    });
+    var p2 = p.replace(/(<\s*input\s*\w*\s*type="radio")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
     });
     return p2;
   }
