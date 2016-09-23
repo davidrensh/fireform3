@@ -131,7 +131,6 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     return p2;
   }
 
-
   ConvertDropdown(src: string): string {
     var p = src.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*.+?)/g, function (match, a, b, c) {
       if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
