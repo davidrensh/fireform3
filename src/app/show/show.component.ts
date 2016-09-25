@@ -26,7 +26,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   protected componentRef: ComponentRef<IHaveDynamicData>;
   private sub: any;
   protected wasViewInitialized = false;
-
+  ssHtml: any;
+  ssVar: any;
   // example entity ... to be recieved from other app parts
   // this is kind of candiate for @Input
   public data = {};
@@ -38,28 +39,30 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   ngOnInit() {
     this.sub = this.route.params.subscribe(params => {
       ShowComponent.formname = params['id'];
-      let o = this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
+      this.ssHtml = this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
           ShowComponent.html = convertedHtml;
+          console.log(ShowComponent.html);
+          setTimeout(() => {
+
+            if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
+              this.ssVar = this.af.database.list("/forms/" + ShowComponent.formname + "/data").subscribe(items => {
+                items.map(item => {
+                  this.data[item.varname] = item.value;
+                });
+              }
+              );
+
+              this.ssVar.unsubscribe();
+              this.refreshContent();
+            }
+          }, 1000);
         }
       }
       );
 
-      setTimeout(() => {
 
-        if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
-          let l = this.af.database.list("/forms/" + ShowComponent.formname + "/data").subscribe(items => {
-            items.map(item => {
-              this.data[item.varname] = item.value;
-            });
-          }
-          );
-
-          l.unsubscribe();
-          o.unsubscribe();
-        }
-      }, 1000);
     });
 
   }
@@ -92,56 +95,94 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
     return s;
   }
-  ConvertInputTextBox(src: string): string {
-    var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="text".+?)/g, function (match, a, b, c) {
+  // escapeRegex(value: string) {
+  //   return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+  // }
+  ReplaceWithParam(src: string, tag: string, typename: string): string {
+    let sr: string = "";
+    if (typename !== "")
+      sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*name=\")(\\w*)(\"\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*type=\"" + typename + "\".+?)";
+    else sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*name=\")(\\w*)(\"\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*.+?)";
+    var re = new RegExp(sr, "g");
+    //console.log(" reg:" + re);
+    var p = src.replace(re, function (match, a, b, c) {
+      console.log("name push" + b);
       if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
       return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
     });
-    var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*type="text")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    if (typename !== "")
+      sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*type=\"" + typename + "\")(\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?)(\\w*\\s+name=" + "\")(\\w*)(\"\\w*\\s*.+?)";
+    else sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*)(\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?)(\\w*\\s+name=" + "\")(\\w*)(\"\\w*\\s*.+?)";
+    re = new RegExp(sr, "g");
+    //console.log(" reg2:" + re);
+    var p2 = p.replace(re, function (match, a, b, c, d, e) {
+      console.log("name push" + b);
       if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
-
       return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
     });
+    if (p2 === "" || p2 === null) p2 = src;
+    return p2;
+  }
+  ConvertInputTextBox(src: string): string {
+    // var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="text".+?)/g, function (match, a, b, c) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
+    //   return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    // });
+    // var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*type="text")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
+
+    //   return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
+    // });
+    var p2 = this.ReplaceWithParam(src, "input", "text");
+    p2 = this.ReplaceWithParam(p2, "input", "tel");
+    p2 = this.ReplaceWithParam(p2, "input", "email");
+    p2 = this.ReplaceWithParam(p2, "input", "search");
+    p2 = this.ReplaceWithParam(p2, "input", "password");
+    p2 = this.ReplaceWithParam(p2, "input", "url");
     return p2;
   }
   ConvertTextarea(src: string): string {
-    var p = src.replace(/(<\s*textarea\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*.+?)/g, function (match, a, b, c) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
+    // var p = src.replace(/(<\s*textarea\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*.+?)/g, function (match, a, b, c) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
 
-      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
-    });
-    var p2 = p.replace(/(<\s*textarea\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
+    //   return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    // });
+    // var p2 = p.replace(/(<\s*textarea\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
 
-      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
-    });
+    //   return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
+    // });
+    var p2 = this.ReplaceWithParam(src, "textarea", "");
     return p2;
   }
   ConvertCheckBox(src: string): string {
-    var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="checkbox".+?)/g, function (match, a, b, c) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
+    // var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="checkbox".+?)/g, function (match, a, b, c) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
 
-      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
-    });
-    var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*type="checkbox")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
+    //   return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    // });
+    // var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*type="checkbox")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
 
-      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
-    });
+    //   return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
+    // });
+
+    var p2 = this.ReplaceWithParam(src, "input", "checkbox");
     return p2;
   }
 
   ConvertDropdown(src: string): string {
-    var p = src.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*.+?)/g, function (match, a, b, c) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
+    // var p = src.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*.+?)/g, function (match, a, b, c) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
 
-      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
-    });
-    var p2 = p.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
+    //   return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    // });
+    // var p2 = p.replace(/(<\s*select\s*\w*=?\"?\'?\w*\"?\'?\s*)(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
 
-      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
-    });
+    //   return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
+    // });
+    var p2 = this.ReplaceWithParam(src, "select", "");
     return p2;
   }
   ConvertTable(src: string): string {
@@ -153,18 +194,18 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     return p2;
   }
   ConvertRadio(src: string): string {
-    var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="radio".+?)/g, function (match, a, b, c) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
+    // var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="radio".+?)/g, function (match, a, b, c) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
 
-      return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
-    });
-    var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*type="radio")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
-      if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
+    //   return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
+    // });
+    // var p2 = p.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*type="radio")(\s*\w*=?\"?\'?\w*\"?\'?)(\w*\s+name=")(\w*)("\w*\s*.+?)/g, function (match, a, b, c, d, e) {
+    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
 
-      return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
-    });
+    //   return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
+    // });
 
-
+    var p2 = this.ReplaceWithParam(src, "input", "radio");
     return p2;
   }
   protected refreshContent() {
