@@ -43,7 +43,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
           ShowComponent.html = convertedHtml;
-          console.log(ShowComponent.html);
+          //console.log(ShowComponent.html);
           setTimeout(() => {
 
             if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
@@ -53,6 +53,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
                 });
               }
               );
+              console.log("Initial namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
 
               this.ssVar.unsubscribe();
               this.refreshContent();
@@ -71,7 +72,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     let formname: string = "f01";
     if (ShowComponent.namelist !== undefined) {
       console.log("html=" + ShowComponent.html);
-      console.log("namelist=" + ShowComponent.namelist + ShowComponent.namelist.length);
+      console.log("Save namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
       for (var i = 0; i < ShowComponent.namelist.length; i++) {
         let n = ShowComponent.namelist[i];
         console.log("dataall:" + JSON.stringify(this.data) + "name:" + n + "datan=" + this.data[n] + "txtArea:" + this.data["txtArea"]);
@@ -102,39 +103,47 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     // this.testFunc();
     let sr: string = "";
     if (typename !== "")
-      sr = "(<\\s*" + tag + "\\s*)([^>]*)(\\s*type=)('|\")(" + typename + ")('|\")(.*)";
+      sr = "(<\\s*" + tag + "\\s*)([^>]*)(\\s*type=)('|\")(" + typename + ")('|\")([^>]*)(>)";
     else
       sr = "(<\\s*" + tag + "\\s*)([^>]*)(\\s*name=\")(\\w*)(\".*)";
     var re = new RegExp(sr, "g");
     // console.log(" reg:" + re);
     if (typename === "") {
-     // console.log("s tag only reg:" + re);
+      console.log("Tag only reg:" + re);
       var p = src.replace(re, function (match, a, b, c, d, e) {
-        if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
-       // console.log("tag only a:" + a + " b:" + b + " c:" + c + " d:" + d + e);
+        console.log("Tag only name push :" + d);
+        if (ShowComponent.namelist.indexOf(d) < 0) ShowComponent.namelist.push(d);
+        console.log("tag only a:" + a + " b:" + b + " c:" + c + " d:" + d + e);
         return a + b + c.replace('name="', '[(ngModel)]="data[\'') + d + "']" + e;
       });
       return p;
     }
-    console.log("chek sreReg=" + re);
-    var p = src.replace(re, function (match, a, b, c, d, e, f, g) {
+    //console.log("chek sreReg=" + re);
+    var p = src.replace(re, function (match, a, b, c, d, e, f, g, h) {
       let s = "";
-      
-      if (b.indexOf(" name=") > -1) s = b;
-      if (g.indexOf(" name=") > -1) s = g;
+      //console.log("tag only a:" + a + " b:" + b + " c:" + c + " d:" + d + " e:" + e + " f:" + f + " g:" + g + " H:" + h);
+      if (b.indexOf("name=") > -1) s = b;
+      if (g.indexOf("name=") > -1) s = g;
+
       let sre = new RegExp("(\\w*=?\"?\\w*\"?)(\\s*name=\")(\\w*)(\".*?)", "g");
       if (s !== "") {
-        console.log("name .s=" + s + " sreReg=" + sre);
-        let srep = s.replace(sre, function (match2,p0, p1, q1, r1) {
-           console.log("name push22:" + q1);
+        //console.log("name .s=" + s + " sreReg=" + sre);
+        let srep = s.replace(sre, function (match2, p0, p1, q1, r1) {
+          //console.log("Attribute name push :" + q1);
           if (ShowComponent.namelist.indexOf(q1) < 0) ShowComponent.namelist.push(q1);
           return p0 + p1.replace('name="', '[(ngModel)]="data[\'') + q1 + "']" + r1;
         });
+        if (b.indexOf("name=") > -1) {
+          // console.log("Final res for b case:" + a + srep + c + d + e + f + g + h);
+          return a + srep + c + d + e + f + g + h;
+        }
+        if (g.indexOf("name=") > -1) {
+          //console.log("Final res for g case:" + a + b + c + d + e + f + srep + h);
+          return a + b + c + d + e + f + srep + h;
+        }
 
-        if (b.indexOf(" name=") > -1) return a + srep + c + d + e + f + g;
-        if (g.indexOf(" name=") > -1) return a + b + c + d + e + f + srep;
       }
-      else return a + b + c + d + e + f + g;
+      return a + b + c + d + e + f + g + h;
     });
 
     return p;
