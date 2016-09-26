@@ -87,10 +87,10 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   }
   ConvertToNg2Template(src: string): string {
     let s = this.ConvertInputTextBox(src);
-    // s = this.ConvertTextarea(s);
-    // s = this.ConvertCheckBox(s);
-    // s = this.ConvertRadio(s);
-    // s = this.ConvertDropdown(s);
+    s = this.ConvertTextarea(s);
+    s = this.ConvertCheckBox(s);
+    s = this.ConvertRadio(s);
+    s = this.ConvertDropdown(s);
     //s = this.ConvertTable(s);
 
     return s;
@@ -99,50 +99,36 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   //   return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
   // }
   ReplaceWithParam(src: string, tag: string, typename: string): string {
-
+    // this.testFunc();
     let sr: string = "";
-    sr = "(<\\s*" + tag + "\\s+)(.+?)(\\s*type=)('|\")(" + typename + ")('|\")(.+?)";
-    console.log(" sr:" + sr);
-    // if (typename !== "")
-    //   sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*name=\")(\\w*)(\"\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*type=\"" + typename + "\".+?)";
-    // else sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*name=\")(\\w*)(\"\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*.+?)";
-    // var re = new RegExp(sr, "g");
-    // console.log(" reg:" + re);
-    // var p = src.replace(re, function (match, a, b, c) {
-    //   console.log("name push" + b);
-    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
-    //   return a.replace(' name="', ' [(ngModel)]="data[\'') + b + "']" + c;
-    // });
-    // if (typename !== "")
-    //   sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*type=\"" + typename + "\")(\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?)(\\w*\\s+name=" + "\")(\\w*)(\"\\w*\\s*.+?)";
-    // else sr = "(<\\s*" + tag + "\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?\\s*)(\\s*\\w*=?\\\"?\\'?\\w*\\\"?\\'?)(\\w*\\s+name=" + "\")(\\w*)(\"\\w*\\s*.+?)";
-    // re = new RegExp(sr, "g");
-    // console.log(" reg2:" + re);
-    // var p2 = p.replace(re, function (match, a, b, c, d, e) {
-    //   console.log("name push" + b);
-    //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(d);
-    //   return a + b + c.replace(' name="', ' [(ngModel)]="data[\'') + d + "']" + e;
-    // });
-    // if (p2 === "" || p2 === null) p2 = src;
-
+    if (typename !== "")
+      sr = "(<\\s*" + tag + "\\s*)([^>]*)(\\s*type=)('|\")(" + typename + ")('|\")(.*)";
+    else
+      sr = "(<\\s*" + tag + "\\s*)([^>]*)(\\s*name=\")(\\w*)(\".*)";
     var re = new RegExp(sr, "g");
-    console.log(" reg:" + re);
+    // console.log(" reg:" + re);
+    if (typename === "") {
+     // console.log("s tag only reg:" + re);
+      var p = src.replace(re, function (match, a, b, c, d, e) {
+        if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
+       // console.log("tag only a:" + a + " b:" + b + " c:" + c + " d:" + d + e);
+        return a + b + c.replace('name="', '[(ngModel)]="data[\'') + d + "']" + e;
+      });
+      return p;
+    }
+    console.log("chek sreReg=" + re);
     var p = src.replace(re, function (match, a, b, c, d, e, f, g) {
-     // console.log("name ..." + a + b + c + d + e + f + g);
-      //console.log("name .b=" + b);
       let s = "";
-      if (b.indexOf(" name=") > -1) {
-        s = b;
-        
-      }
+      
+      if (b.indexOf(" name=") > -1) s = b;
       if (g.indexOf(" name=") > -1) s = g;
-      let sre = new RegExp("(\\w*=?\\\"?\\'?\\s*name=\")(\w*)(\".+?)", "g");
+      let sre = new RegExp("(\\w*=?\"?\\w*\"?)(\\s*name=\")(\\w*)(\".*?)", "g");
       if (s !== "") {
         console.log("name .s=" + s + " sreReg=" + sre);
-        let srep = s.replace(sre, function (mm, p1, q1, r1) {
-          console.log("name push" + q1);
+        let srep = s.replace(sre, function (match2,p0, p1, q1, r1) {
+           console.log("name push22:" + q1);
           if (ShowComponent.namelist.indexOf(q1) < 0) ShowComponent.namelist.push(q1);
-          return p1.replace(' name="', ' [(ngModel)]="data[\'') + q1 + "']" + r1;
+          return p0 + p1.replace('name="', '[(ngModel)]="data[\'') + q1 + "']" + r1;
         });
 
         if (b.indexOf(" name=") > -1) return a + srep + c + d + e + f + g;
@@ -153,6 +139,20 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
     return p;
   }
+  // testFunc() {
+  //   let s = 'maxlength="100" name="txtOfficeTel" required="required" size="20';
+  //   let sre = new RegExp("(\\w*=?\"?'?\\w*\"?'?)(\\s*name=\")(\\w*)(\".+?)", "g");
+  //   if (s !== "") {
+  //     console.log("xxx .s=" + s + " sreReg=" + sre);
+  //     let srep = s.replace(sre, function (match, a, b, c, d) {
+  //       console.log("yyyy:" + a + b + c + d);
+  //       //if (ShowComponent.namelist.indexOf(q1) < 0) ShowComponent.namelist.push(q1);
+  //       return a + b.replace(' name="', ' [(ngModel)]="data[\'') + c + "']" + d;
+  //     });
+
+  //     console.log(srep);
+  //   }
+  // }
   ConvertInputTextBox(src: string): string {
     // var p = src.replace(/(<\s*input\s*\w*=?\"?\'?\w*\"?\'?\s*name=")(\w*)("\s*\w*=?\"?\'?\w*\"?\'?\s*type="text".+?)/g, function (match, a, b, c) {
     //   if (ShowComponent.namelist.indexOf(b) < 0) ShowComponent.namelist.push(b);
@@ -165,10 +165,11 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     // });
     //  var p2 = this.ReplaceWithParam(src, "input", "text");
     var p2 = this.ReplaceWithParam(src, "input", "tel");
-    // p2 = this.ReplaceWithParam(p2, "input", "email");
-    // p2 = this.ReplaceWithParam(p2, "input", "search");
-    // p2 = this.ReplaceWithParam(p2, "input", "password");
-    // p2 = this.ReplaceWithParam(p2, "input", "url");
+    p2 = this.ReplaceWithParam(p2, "input", "email");
+    p2 = this.ReplaceWithParam(p2, "input", "text");
+    p2 = this.ReplaceWithParam(p2, "input", "search");
+    p2 = this.ReplaceWithParam(p2, "input", "password");
+    p2 = this.ReplaceWithParam(p2, "input", "url");
     return p2;
   }
   ConvertTextarea(src: string): string {
