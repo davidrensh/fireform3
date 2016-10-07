@@ -13,12 +13,14 @@ export class TempeditorComponent implements OnInit {
     // console.log("testtttt11111");
     // this.content = `<p>My HTML22</p>`;
     let formname: string = "f01";
-    this.af.database.object("/forms/" + formname).subscribe(res => {
+    let subs = this.af.database.object("/forms/" + formname).subscribe(res => {
       if (res) {
         this.content = res.contenthtml;
+        //subs.unsubscribe();
       }
     }
     );
+
   }
 
   ngOnInit() {
@@ -26,11 +28,13 @@ export class TempeditorComponent implements OnInit {
   }
   saveForm() {
     let formname: string = "f01";
+    //if (this !== undefined && this.content !== undefined) {
     console.log("html=" + this.content);
     this.af.database.object("/forms/" + formname).update({
       name: formname,
       contenthtml: this.content,
       updateddate: (new Date()).toISOString().substr(0, 10)
     });
+    // }
   }
 }

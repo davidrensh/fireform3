@@ -43,7 +43,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
           ShowComponent.html = convertedHtml;
-          //console.log(ShowComponent.html);
+          console.log(ShowComponent.html);
           setTimeout(() => {
 
             if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {

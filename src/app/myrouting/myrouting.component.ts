@@ -9,7 +9,7 @@ import { ApiComponent } from '../api/api.component';
 const appRoutes: Routes = [
   { path: 'editor', component: TempeditorComponent },
   { path: 'list', component: ListComponent },
-  { path: 'show/:id', component: ShowComponent },
+  { path: 'show/:id', component: ShowComponent }, //http://localhost:4200/show/f01
   { path: 'loader', component: LoaderComponent },
   { path: 'api', component: ApiComponent },
     { path: '', component: ListComponent },
