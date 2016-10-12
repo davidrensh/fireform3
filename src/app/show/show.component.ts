@@ -1,12 +1,12 @@
-import { Component, ComponentRef, ViewChild, ViewContainerRef}   from '@angular/core';
-import { AfterViewInit, OnInit, OnDestroy}          from '@angular/core';
-import { OnChanges, SimpleChange, ComponentFactory} from '@angular/core';
+import { Component, ComponentRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, OnInit, OnDestroy } from '@angular/core';
+import { OnChanges, SimpleChange, ComponentFactory } from '@angular/core';
 import { COMPILER_PROVIDERS } from '@angular/compiler';
 
 import { IHaveDynamicData, DynamicTypeBuilder } from '../dynamic/type.builder';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
-import { ActivatedRoute} from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-show',
@@ -16,6 +16,7 @@ import { ActivatedRoute} from '@angular/router';
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
   <div #dynamicContentPlaceHolder></div>  <hr />
   data: <pre>{{data | json}}</pre>
+  exdata: <pre>{{exdata | json}}</pre>
 </div>
 `,
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
@@ -31,6 +32,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   // example entity ... to be recieved from other app parts
   // this is kind of candiate for @Input
   public data = {};
+  public exdata = {};
   static namelist: string[] = [];
   static html: string;
   static formname: string = "f02";
@@ -44,21 +46,29 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
           ShowComponent.html = convertedHtml;
           console.log(ShowComponent.html);
-          setTimeout(() => {
 
-            if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
-              this.ssVar = this.af.database.list("/forms/" + ShowComponent.formname + "/data").subscribe(items => {
-                items.map(item => {
-                  this.data[item.varname] = item.value;
-                });
-              }
-              );
-              console.log("Initial namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
+          // setTimeout(() => {
 
+          if (ShowComponent.html !== undefined && ShowComponent.html.length > 0) {
+
+            this.ssVar = this.af.database.list("/forms/" + ShowComponent.formname + "/data").subscribe(items => {
+              items.map(item => {
+                this.data[item.varname] = item.value;
+              });
+            }
+            );
+
+            this.loadExdata(ShowComponent.html);
+            // console.log("exdata EEE:" + JSON.stringify(this.data));
+            console.log("Initial namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
+            console.log("data G:" + JSON.stringify(this.data));
+
+            setTimeout(() => {
               this.ssVar.unsubscribe();
               this.refreshContent();
-            }
-          }, 1000);
+            }, 1000);
+          }
+          // }, 1000);
         }
       }
       );
@@ -67,9 +77,50 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     });
 
   }
+  loadExdata(s: string) {
+    let match = -1;
+    let matchEnd = -1;
+    let toMatch = "data['";
+    let toMatchEnd = "_";
+    let i = 0;
+    while ((match = s.indexOf(toMatch, i)) > -1) {
+      matchEnd = s.indexOf(toMatchEnd, match + 1);
+      if (matchEnd > -1) {
+        let exname = s.substr(match + toMatch.length, matchEnd - (match + toMatch.length));
+        if (exname.indexOf("'") < 0 && exname.indexOf("\"") < 0) {
+          console.log("exname 11:" + exname + "::");
+          //console.log("exname :" + exname + " hh:" + match + toMatch.length + matchEnd);
+          //this.exdata[exname]
+          //setTimeout(() => {
+          //console.log("exname 22:" + exname + "::");
 
+          let sVar = this.af.database.list("/forms/" + exname + "/data").subscribe(items => {
+            //this.exdata[exname] = "cheating008";
+            //console.log("exdata A:" + this.exdata[exname] );// + JSON.stringify(this.exdata));
+            //this.exdata[exname] = items;
+
+            items.map(item => {
+              //console.log("exdata C:" + item.varname + item.value);
+              this.data[exname + "_" + item.varname] = item.value;
+              console.log(exname + "_" + item.varname + "exdata D:" + this.data[exname + "_" + item.varname] + JSON.stringify(this.data));
+              //this.exdata[exname][item.varname] = item.value;
+              //console.log("exdata D:" + item.varname + item.value + this.exdata[exname][item.varname]);
+              // console.log("exdata 001:" + item + JSON.stringify(item));// + JSON.stringify(this.exdata));
+              // ;//"cheating";
+              // console.log("exdata 009:" + this.exdata[exname] + this.exdata['f03']+ this.exdata[exname]);
+            });
+          }
+          );
+          //sVar.unsubscribe();
+          //}, 1000);
+        }
+      }
+      i = match + toMatch.length;
+    }
+    //console.log("exdata :" + JSON.stringify(this.exdata));
+  }
   saveData() {
-    let formname: string = "f01";
+    //let formname: string = "f01";
     if (ShowComponent.namelist !== undefined) {
       console.log("html=" + ShowComponent.html);
       console.log("Save namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
@@ -77,7 +128,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let n = ShowComponent.namelist[i];
         console.log("dataall:" + JSON.stringify(this.data) + "name:" + n + "datan=" + this.data[n] + "txtArea:" + this.data["txtArea"]);
 
-        this.af.database.object("/forms/" + formname + "/data/" + n).update({
+        this.af.database.object("/forms/" + ShowComponent.formname + "/data/" + n).update({
           varname: n,
           value: (this.data[n] === undefined) ? " " : this.data[n],
           updateddate: (new Date()).toISOString().substr(0, 10)
@@ -107,7 +158,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var re = new RegExp(sr, "g");
     // console.log(" reg:" + re);
     if (typename === "") {
-     // console.log("Tag only reg:" + re);
+      // console.log("Tag only reg:" + re);
       var p = src.replace(re, function (match, a, b, c, d, e) {
         //console.log("Tag only name push :" + d);
         if (ShowComponent.namelist.indexOf(d) < 0) ShowComponent.namelist.push(d);

@@ -1,5 +1,10 @@
+<label *ngFor="let d of fireforms | async">
+    <input class="radio-inline" type="radio" name="formname" (click)="selectForm(d)" > {{d.name }}  &nbsp; &nbsp;
+</label>
+<input class="form-control" required [(ngModel)]="formname" placeholder="Fire Form Name">
 <button class="btn btn-primary-outline btn-sm" (click)="saveForm()">Save form</button>
 
-<ckeditor [(ngModel)]="content" [config]="{extraAllowedContent : '*[*]'}" debounce="500">
+<button class="btn btn-primary-outline btn-sm" (click)="insertStuff()">Insert Stuff</button>
+<ckeditor [(ngModel)]="content" #myckeditor name="myckeditor" [config]="{extraAllowedContent : '*[*]' , height : 720, entities : false}" debounce="500">
     <p>Hello <strong>world</strong></p>
 </ckeditor>

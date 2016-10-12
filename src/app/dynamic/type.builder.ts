@@ -1,9 +1,10 @@
-import {Component, ComponentFactory, NgModule, Input, Injectable} from '@angular/core';
-import {RuntimeCompiler} from '@angular/compiler';
+import { Component, ComponentFactory, NgModule, Input, Injectable } from '@angular/core';
+import { RuntimeCompiler } from '@angular/compiler';
 
-import { PartsModule }   from '../parts/parts.module';
+import { PartsModule } from '../parts/parts.module';
 
 export interface IHaveDynamicData {
+    exdata: any;
     data: any;
 }
 
@@ -54,6 +55,7 @@ export class DynamicTypeBuilder {
             template: tmpl,
         })
         class CustomDynamicComponent implements IHaveDynamicData {
+            @Input() exdata: any;
             @Input() data: any;
         };
         // a component for this particular template
