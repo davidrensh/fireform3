@@ -81,7 +81,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     let match = -1;
     let matchEnd = -1;
     let toMatch = "data['";
-    let toMatchEnd = "_";
+    let toMatchEnd = ".";
     let i = 0;
     while ((match = s.indexOf(toMatch, i)) > -1) {
       matchEnd = s.indexOf(toMatchEnd, match + 1);
@@ -101,8 +101,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
             items.map(item => {
               //console.log("exdata C:" + item.varname + item.value);
-              this.data[exname + "_" + item.varname] = item.value;
-              console.log(exname + "_" + item.varname + "exdata D:" + this.data[exname + "_" + item.varname] + JSON.stringify(this.data));
+              this.data[exname + toMatchEnd + item.varname] = item.value;
+              console.log(exname + toMatchEnd + item.varname + "exdata D:" + this.data[exname + toMatchEnd + item.varname] + JSON.stringify(this.data));
               //this.exdata[exname][item.varname] = item.value;
               //console.log("exdata D:" + item.varname + item.value + this.exdata[exname][item.varname]);
               // console.log("exdata 001:" + item + JSON.stringify(item));// + JSON.stringify(this.exdata));
