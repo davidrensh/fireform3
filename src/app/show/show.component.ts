@@ -45,7 +45,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
           ShowComponent.html = convertedHtml;
-          console.log(ShowComponent.html);
+         // console.log(ShowComponent.html);
 
           // setTimeout(() => {
 
@@ -60,8 +60,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
             this.loadExdata(ShowComponent.html);
             // console.log("exdata EEE:" + JSON.stringify(this.data));
-            console.log("Initial namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
-            console.log("data G:" + JSON.stringify(this.data));
+            //console.log("Initial namelist=" + ShowComponent.namelist + " len=" + ShowComponent.namelist.length);
+            //console.log("data G:" + JSON.stringify(this.data));
 
             setTimeout(() => {
               this.ssVar.unsubscribe();
@@ -88,7 +88,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       if (matchEnd > -1) {
         let exname = s.substr(match + toMatch.length, matchEnd - (match + toMatch.length));
         if (exname.indexOf("'") < 0 && exname.indexOf("\"") < 0) {
-          console.log("exname 11:" + exname + "::");
+         // console.log("exname 11:" + exname + "::");
           //console.log("exname :" + exname + " hh:" + match + toMatch.length + matchEnd);
           //this.exdata[exname]
           //setTimeout(() => {
@@ -102,7 +102,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
             items.map(item => {
               //console.log("exdata C:" + item.varname + item.value);
               this.data[exname + toMatchEnd + item.varname] = item.value;
-              console.log(exname + toMatchEnd + item.varname + "exdata D:" + this.data[exname + toMatchEnd + item.varname] + JSON.stringify(this.data));
+              //console.log(exname + toMatchEnd + item.varname + "exdata D:" + this.data[exname + toMatchEnd + item.varname] + JSON.stringify(this.data));
               //this.exdata[exname][item.varname] = item.value;
               //console.log("exdata D:" + item.varname + item.value + this.exdata[exname][item.varname]);
               // console.log("exdata 001:" + item + JSON.stringify(item));// + JSON.stringify(this.exdata));
