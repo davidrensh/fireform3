@@ -15,10 +15,10 @@ import { ActivatedRoute } from '@angular/router';
   <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
   <div #dynamicContentPlaceHolder></div>  <hr />
-  data: <pre>{{data | json}}</pre>
-  exdata: <pre>{{exdata | json}}</pre>
 </div>
 `,
+  // data: <pre>{{data | json}}</pre>
+  // exdata: <pre>{{exdata | json}}</pre>  
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
 })
 export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
