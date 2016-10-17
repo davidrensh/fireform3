@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, NgZone, Input } from '@angular/core';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-import { CKEditorModule } from 'ng2-ckeditor'
+//import { CKEditorModule } from 'ng2-ckeditor'
 
 @Component({
   selector: 'app-tempeditor',
@@ -8,7 +8,8 @@ import { CKEditorModule } from 'ng2-ckeditor'
   styleUrls: ['tempeditor.component.css']
 })
 export class TempeditorComponent implements OnInit {
-  myckeditor: any;
+  //myckeditor: any;
+  @ViewChild('ckeditor') ckeditor: any;
   fireforms: FirebaseListObservable<any[]>;
   content: any;
   formname: string;
@@ -29,9 +30,9 @@ export class TempeditorComponent implements OnInit {
         limitToFirst: 1
       }
     }).subscribe(r => {
-     // console.log("from q list:" + JSON.stringify(r));
+      // console.log("from q list:" + JSON.stringify(r));
       if (r) r.map(rr => {
-         this.selectForm(rr);
+        this.selectForm(rr);
       });
     });
 
@@ -55,8 +56,15 @@ export class TempeditorComponent implements OnInit {
     //    CKEditor..replace( targetId );
   }
   insertStuff() {
-    console.log("Editor details2:" + this.myckeditor);
-    this.content = 'Telephone:&nbsp;<input maxlength="100" name="txtOfficeTel" required="required" size="20" type="tel" />' + this.content;
+    // console.log("this.ckeditor.instance");
+     console.log(this.ckeditor.instance);
+    var s = 'Telephone:&nbsp;<input maxlength="100" name="txtOfficeTel" required="required" size="20" type="tel" />';
+    //this.ckeditor.instance.insertElement(s);
+
+   // var fragment = this.ckeditor.getSelection().getRanges()[0].extractContents()
+   // var container = this.ckeditor.dom.element.createFromHtml(s, this.ckeditor.instance.document)
+    //fragment.appendTo(container)
+    this.ckeditor.instance.insertHtml(s)
   }
   saveForm() {
     //let formname: string = "f01";
