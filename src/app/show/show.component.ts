@@ -14,6 +14,7 @@ import { ActivatedRoute } from '@angular/router';
 <div>
   <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
+  <button class="btn btn-primary-outline btn-sm" (click)="print()">Print as PDF</button>
   <div #dynamicContentPlaceHolder></div>  <hr />
 </div>
 `,
@@ -45,7 +46,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
           ShowComponent.html = convertedHtml;
-         // console.log(ShowComponent.html);
+          // console.log(ShowComponent.html);
 
           // setTimeout(() => {
 
@@ -88,7 +89,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       if (matchEnd > -1) {
         let exname = s.substr(match + toMatch.length, matchEnd - (match + toMatch.length));
         if (exname.indexOf("'") < 0 && exname.indexOf("\"") < 0) {
-         // console.log("exname 11:" + exname + "::");
+          // console.log("exname 11:" + exname + "::");
           //console.log("exname :" + exname + " hh:" + match + toMatch.length + matchEnd);
           //this.exdata[exname]
           //setTimeout(() => {
@@ -119,6 +120,10 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     }
     //console.log("exdata :" + JSON.stringify(this.exdata));
   }
+  print() {
+
+
+  }
   saveData() {
     //let formname: string = "f01";
     if (ShowComponent.namelist !== undefined) {
@@ -145,6 +150,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     s = this.ConvertDropdown(s);
     //s = this.ConvertTable(s);
 
+    s = this.ConvertRepeator(s);
+    console.log(s);
     return s;
   }
 
@@ -212,8 +219,6 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     return p2;
   }
   ConvertCheckBox(src: string): string {
-
-
     var p2 = this.ReplaceWithParam(src, "input", "checkbox");
     return p2;
   }
@@ -222,6 +227,75 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
     var p2 = this.ReplaceWithParam(src, "select", "");
     return p2;
+  }
+
+  ConvertRepeator(src: string): string {
+    var strReplaceAll = src;
+    let sField = ' field="';
+    let sRepeator = ' repeator="';
+    let sCrud = ' crud="';
+    let sDatasource = ' datasource="';
+    let sUsername = ' username="';
+    let spassword = ' password="';
+    var crud = "";
+    var datasource = "";
+    var repeator = "";
+    var username = "";
+    var password = "";
+    var field = "";
+    var iRepeator = strReplaceAll.indexOf(sRepeator);
+    console.log("iRepeator" + iRepeator);
+    // Loop over the string value replacing out each matching
+    // substring.
+    while (iRepeator != -1) {
+      // Relace out the current instance.
+      let sectionStart = strReplaceAll.lastIndexOf("<", iRepeator);
+      console.log("sectionStart" + sectionStart);
+      if (sectionStart < 0) return src;
+      let mainTagEnd = strReplaceAll.indexOf(" ", sectionStart)
+      console.log("mainTagEnd" + mainTagEnd);
+      if (mainTagEnd < 0) return src;
+
+      let mainTag = strReplaceAll.substring(sectionStart, mainTagEnd - sectionStart);
+      let sectionEnd = strReplaceAll.indexOf("</" + mainTag + ">", sectionStart)
+      console.log("mainTag" + mainTag + sectionEnd);
+      if (sectionEnd < 0) return src;
+
+      crud = this.GetAttributeValue(strReplaceAll, sectionStart, sCrud);
+      datasource = this.GetAttributeValue(strReplaceAll, sectionStart, sDatasource);
+      username = this.GetAttributeValue(strReplaceAll, sectionStart, sUsername);
+      password = this.GetAttributeValue(strReplaceAll, sectionStart, spassword);
+      repeator = this.GetAttributeValue(strReplaceAll, sectionStart, sRepeator);
+      console.log("crud" + crud + datasource + username + password + repeator);
+      strReplaceAll = strReplaceAll.replace(sCrud + crud + '"', "");
+      strReplaceAll = strReplaceAll.replace(sDatasource + datasource + '"', "");
+      strReplaceAll = strReplaceAll.replace(sUsername + username + '"', "");
+      strReplaceAll = strReplaceAll.replace(spassword + password + '"', "");
+      strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of RptDetails | async"');
+
+      let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
+      while (fieldStart != -1) {
+        let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
+        let detailTagEnd = strReplaceAll.indexOf(" ", detailStart);
+        let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd - 1);
+        let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
+        field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
+        strReplaceAll = strReplaceAll.replace(sField + field + '">', ">{{dataobj." + field + "}}");
+        fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
+      }
+
+      iRepeator = strReplaceAll.indexOf(sRepeator);
+    }
+
+    return strReplaceAll;
+  }
+  GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
+    let start = strReplaceAll.indexOf(find, sectionStart);
+    if (start > 0) {
+      let end = strReplaceAll.indexOf('"', start);
+      return strReplaceAll.substring(start + find.length, end - 1);
+    }
+    return "";
   }
   ConvertTable(src: string): string {
     var p2 = src.replace(/(input.+)(name=")(.+?)(".+)(type="text")(.+)/g, function (match, prefix, handler, name, suffix, suffix2, suffix3) {
