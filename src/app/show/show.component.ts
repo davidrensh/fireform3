@@ -230,7 +230,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   }
 
   ConvertRepeator(src: string): string {
-    var strReplaceAll = src;
+    let strReplaceAll = src;
     let sField = ' field="';
     let sRepeator = ' repeator="';
     let sCrud = ' crud="';
@@ -243,22 +243,23 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var username = "";
     var password = "";
     var field = "";
-    var iRepeator = strReplaceAll.indexOf(sRepeator);
+    let iRepeator = strReplaceAll.indexOf(sRepeator);
+    if (iRepeator === undefined) return src;
     console.log("iRepeator" + iRepeator);
     // Loop over the string value replacing out each matching
     // substring.
-    while (iRepeator != -1) {
+    while (iRepeator !== undefined && iRepeator != -1) {
       // Relace out the current instance.
       let sectionStart = strReplaceAll.lastIndexOf("<", iRepeator);
-      console.log("sectionStart" + sectionStart);
-      if (sectionStart < 0) return src;
+      console.log("sectionStart" + sectionStart + strReplaceAll.substring(sectionStart, sectionStart + 20));
+      //if (sectionStart === undefined || sectionStart < 0) return src;
       let mainTagEnd = strReplaceAll.indexOf(" ", sectionStart)
-      console.log("mainTagEnd" + mainTagEnd);
+      console.log("mainTagEnd" + mainTagEnd + strReplaceAll.substring(mainTagEnd, mainTagEnd + 20));
       if (mainTagEnd < 0) return src;
 
-      let mainTag = strReplaceAll.substring(sectionStart, mainTagEnd - sectionStart);
+      let mainTag = strReplaceAll.substring(sectionStart + 1, mainTagEnd);
       let sectionEnd = strReplaceAll.indexOf("</" + mainTag + ">", sectionStart)
-      console.log("mainTag" + mainTag + sectionEnd);
+      console.log("mainTag" + mainTag + sectionEnd + strReplaceAll.substring(sectionEnd, sectionEnd + 20));
       if (sectionEnd < 0) return src;
 
       crud = this.GetAttributeValue(strReplaceAll, sectionStart, sCrud);
@@ -276,24 +277,31 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       while (fieldStart != -1) {
         let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
+        console.log("START:" + detailStart );
         let detailTagEnd = strReplaceAll.indexOf(" ", detailStart);
-        let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd - 1);
+        let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd );
         let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
+         
         field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
+        console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
         strReplaceAll = strReplaceAll.replace(sField + field + '">', ">{{dataobj." + field + "}}");
         fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       }
 
-      iRepeator = strReplaceAll.indexOf(sRepeator);
+      if (strReplaceAll.indexOf(sRepeator) !== iRepeator)
+        iRepeator = strReplaceAll.indexOf(sRepeator);
+      else iRepeator = -1;
     }
 
     return strReplaceAll;
   }
   GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
-    let start = strReplaceAll.indexOf(find, sectionStart);
+    let start = strReplaceAll.indexOf(find, sectionStart) + find.length;
+    
     if (start > 0) {
       let end = strReplaceAll.indexOf('"', start);
-      return strReplaceAll.substring(start + find.length, end - 1);
+     
+      return strReplaceAll.substring(start , end  );
     }
     return "";
   }
