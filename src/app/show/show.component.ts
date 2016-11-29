@@ -33,7 +33,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   // example entity ... to be recieved from other app parts
   // this is kind of candiate for @Input
   public data = {};
-  public exdata = {};
+  public rowedit = {};
+  public roweditvalue = {};
   static namelist: string[] = [];
   static html: string;
   static formname: string = "f02";
@@ -103,6 +104,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
             items.map(item => {
               //console.log("exdata C:" + item.varname + item.value);
               this.data[exname + toMatchEnd + item.varname] = item.value;
+              //console.log("exname + toMatchEnd + item.varname:" + exname + toMatchEnd + item.varname + "   Value:" + item.value);
               //console.log(exname + toMatchEnd + item.varname + "exdata D:" + this.data[exname + toMatchEnd + item.varname] + JSON.stringify(this.data));
               //this.exdata[exname][item.varname] = item.value;
               //console.log("exdata D:" + item.varname + item.value + this.exdata[exname][item.varname]);
@@ -118,7 +120,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       }
       i = match + toMatch.length;
     }
-    //console.log("exdata :" + JSON.stringify(this.exdata));
+    //console.log("exdata :" + JSON.stringify(this.data));
   }
   print() {
 
@@ -245,63 +247,117 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var field = "";
     let iRepeator = strReplaceAll.indexOf(sRepeator);
     if (iRepeator === undefined) return src;
-    console.log("iRepeator" + iRepeator);
+    //console.log("iRepeator" + iRepeator);
     // Loop over the string value replacing out each matching
     // substring.
     while (iRepeator !== undefined && iRepeator != -1) {
       // Relace out the current instance.
       let sectionStart = strReplaceAll.lastIndexOf("<", iRepeator);
-      console.log("sectionStart" + sectionStart + strReplaceAll.substring(sectionStart, sectionStart + 20));
+      //console.log("sectionStart" + sectionStart + strReplaceAll.substring(sectionStart, sectionStart + 20));
       //if (sectionStart === undefined || sectionStart < 0) return src;
       let mainTagEnd = strReplaceAll.indexOf(" ", sectionStart)
-      console.log("mainTagEnd" + mainTagEnd + strReplaceAll.substring(mainTagEnd, mainTagEnd + 20));
+      //console.log("mainTagEnd" + mainTagEnd + strReplaceAll.substring(mainTagEnd, mainTagEnd + 20));
       if (mainTagEnd < 0) return src;
 
       let mainTag = strReplaceAll.substring(sectionStart + 1, mainTagEnd);
       let sectionEnd = strReplaceAll.indexOf("</" + mainTag + ">", sectionStart)
-      console.log("mainTag" + mainTag + sectionEnd + strReplaceAll.substring(sectionEnd, sectionEnd + 20));
+      //console.log("mainTag" + mainTag + sectionEnd + strReplaceAll.substring(sectionEnd, sectionEnd + 20));
+      // console.log("mainTag:" + mainTag);
       if (sectionEnd < 0) return src;
+
+      let sMainTagSection = strReplaceAll.substring(sectionStart, sectionEnd + ("</" + mainTag + ">").length);
+      console.log("sMainTagSection:" + sMainTagSection);
 
       crud = this.GetAttributeValue(strReplaceAll, sectionStart, sCrud);
       datasource = this.GetAttributeValue(strReplaceAll, sectionStart, sDatasource);
       username = this.GetAttributeValue(strReplaceAll, sectionStart, sUsername);
       password = this.GetAttributeValue(strReplaceAll, sectionStart, spassword);
       repeator = this.GetAttributeValue(strReplaceAll, sectionStart, sRepeator);
-      console.log("crud" + crud + datasource + username + password + repeator);
+      //console.log("crud" + crud + datasource + username + password + repeator);
       strReplaceAll = strReplaceAll.replace(sCrud + crud + '"', "");
       strReplaceAll = strReplaceAll.replace(sDatasource + datasource + '"', "");
       strReplaceAll = strReplaceAll.replace(sUsername + username + '"', "");
       strReplaceAll = strReplaceAll.replace(spassword + password + '"', "");
-      strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of RptDetails | async"');
+      let ds = "";
+      if (datasource !== null && datasource !== "" && repeator !== "") {
+        ds = "data['" + datasource + "." + repeator + "']";
+        this.data[datasource + '.' + repeator] = this.af.database.list("/forms/" + datasource + "/data/" + repeator);
+      } else if (repeator !== "") {
+        ds = "data['" + repeator + "']";
+        this.data[repeator] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/" + repeator);
+      }
+
+      strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of ' + ds + ' | async; let i = index"');
+      let sAddNewHeader = this.GetAddNewSection(sMainTagSection, mainTag, repeator);
+      //let sAddNewSection = this.GetAddNewSection(sMainTagSection);
 
       let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       while (fieldStart != -1) {
         let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
-        console.log("START:" + detailStart );
+        //console.log("START:" + detailStart );
         let detailTagEnd = strReplaceAll.indexOf(" ", detailStart);
-        let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd );
+        let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd);
         let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
-         
+
         field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
-        console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
-        strReplaceAll = strReplaceAll.replace(sField + field + '">', ">{{dataobj." + field + "}}");
+        //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
+        strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj.' + field + '}}<button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, true)">Edit</button><button class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + field + '\',i, true)">Update</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, false)">Cancel</button>');
         fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       }
+      let addNewSection = this.AddNewAddInputSaveSection(sAddNewHeader, mainTag, repeator, sField, datasource);
 
       if (strReplaceAll.indexOf(sRepeator) !== iRepeator)
         iRepeator = strReplaceAll.indexOf(sRepeator);
       else iRepeator = -1;
+      strReplaceAll = strReplaceAll.substring(0, sectionStart) + addNewSection + strReplaceAll.substring(sectionStart);
     }
 
     return strReplaceAll;
   }
+  GetAddNewSection(s: string, mainTag: string, repeator: string): string {
+    let s1 = s.substring(0, mainTag.length + 1);
+    let mainTagEnd = s.indexOf(">", 0);
+    let s2 = s.substring(mainTagEnd + 1);
+    s = s1 + s2;
+    // let firstInnerEnd = s.indexOf(">", mainTagEnd + 1);
+    // s = s.substring(0, firstInnerEnd) + '<button class="btn btn-primary-outline btn-sm" (click)="AddNew(\'' + repeator + '\',i, true)">Add</button>' +  s.substring(firstInnerEnd + 1);
+    return s;
+  }
+  AddNewAddInputSaveSection(s: string, mainTag: string, repeator: string, sField: string, datasource: string): string {
+    let isFirst = true;
+    var field = "";
+    let fieldStart = s.lastIndexOf(sField, s.length);
+    while (fieldStart != -1) {
+      let detailStart = s.lastIndexOf("<", fieldStart);
+      //console.log("START:" + detailStart );
+      let detailTagEnd = s.indexOf(" ", detailStart);
+      let detailTag = s.substring(detailStart + 1, detailTagEnd);
+      let sectionEnd = s.indexOf("</" + detailTag + ">", detailStart);
+
+      field = this.GetAttributeValue(s, detailStart, sField);
+      //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
+      if (isFirst) {
+        s = s.replace(sField + field + '">', '><input [(ngModel)]="' + datasource + '.' + field + '"><button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + field + '\',i, true)">Save</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, false)">Cancel</button>');
+        isFirst = false;
+      } else {
+        s = s.replace(sField + field + '">', '><input [(ngModel)]="' + datasource + '.' + field + '">');
+      }
+      fieldStart = s.lastIndexOf(sField, sectionEnd);
+    }
+    return s;
+  }
+
+  SetEdit(rep: string, field: string, index: number) {
+    console.log("SetEdit:" + rep + field + index);
+  }
+  Update(ds: string, rep: string, field: string, index: number) {
+    console.log("SetEdit:" + ds + rep + field + index);
+  }
   GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
     let start = strReplaceAll.indexOf(find, sectionStart) + find.length;
-    
     if (start > 0) {
       let end = strReplaceAll.indexOf('"', start);
-     
-      return strReplaceAll.substring(start , end  );
+      return strReplaceAll.substring(start, end);
     }
     return "";
   }
