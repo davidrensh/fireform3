@@ -2,10 +2,12 @@ import { Component, ComponentFactory, NgModule, Input, Injectable } from '@angul
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
+import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
 export interface IHaveDynamicData {
     exdata: any;
     data: any;
+    UpdateNew(ds: string, rep: string, fieldList: string, xdata: any): void;
 }
 
 @Injectable()
@@ -57,6 +59,31 @@ export class DynamicTypeBuilder {
         class CustomDynamicComponent implements IHaveDynamicData {
             @Input() exdata: any;
             @Input() data: any;
+            constructor(public af: AngularFire) {
+            }
+            UpdateNew(ds: string, rep: string, fieldList: string, data : any) {
+                console.log("UpdateNew:" + ds + rep + fieldList);
+                if (ds !== undefined) {
+                    var nl = fieldList.split(',');
+                    let d = (new Date()).toISOString().substr(0, 10);
+                    const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + d);
+                    //let dataname = "'" + ds + "." + rep + "." + nl + "'";
+                    //console.log("dataname:" + dataname );
+                    for (var i = 0; i < nl.length; i++) {
+                        let n = nl[i];
+                        
+                        let dataname = "'" + ds + "." + rep + "." + n + "'";
+                        console.log("dataname:" + n);
+                        console.log("data:" + data);
+                        console.log("dataall:" + dataname + data[dataname]);
+
+                        item.update({
+                            n: (data[dataname] === undefined) ? " " : data[dataname]
+                        });
+
+                    }
+                }
+            }
         };
         // a component for this particular template
         return CustomDynamicComponent;

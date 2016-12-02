@@ -14,10 +14,12 @@ import { ActivatedRoute } from '@angular/router';
 <div>
   <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
+  <button class="btn btn-primary-outline btn-sm" (click)="UpdateNew('','','')">UpdateNew</button>
   <button class="btn btn-primary-outline btn-sm" (click)="print()">Print as PDF</button>
   <div #dynamicContentPlaceHolder></div>  <hr />
 </div>
 `,
+  
   // data: <pre>{{data | json}}</pre>
   // exdata: <pre>{{exdata | json}}</pre>  
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
@@ -36,6 +38,10 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   public rowedit = {};
   public roweditvalue = {};
   static namelist: string[] = [];
+  public repeatorVarList: string[] = [];
+
+  public repeatorData = [];
+
   static html: string;
   static formname: string = "f02";
   constructor(protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
@@ -278,13 +284,21 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       strReplaceAll = strReplaceAll.replace(sDatasource + datasource + '"', "");
       strReplaceAll = strReplaceAll.replace(sUsername + username + '"', "");
       strReplaceAll = strReplaceAll.replace(spassword + password + '"', "");
+
       let ds = "";
       if (datasource !== null && datasource !== "" && repeator !== "") {
         ds = "data['" + datasource + "." + repeator + "']";
-        this.data[datasource + '.' + repeator] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
+        this.data["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
+        //this.repeatorData[datasource + '.' + repeator] = null;
+
+        // ds = "repeatorData['" + datasource + "']";
+        // this.repeatorData[datasource] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
+        // this.repeatorData[datasource] = null;
       } else if (repeator !== "") {
         ds = "data['" + repeator + "']";
-        this.data[repeator] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
+        this.data["'" + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
+        //console.log("repeatorDataB:" + JSON.stringify(this.repeatorData[repeator]));
+        //this.repeatorData[repeator] = null;
       }
 
       strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of ' + ds + ' | async; let i = index"');
@@ -301,21 +315,23 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
 
         field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
-        this.data[datasource + '.' + repeator + '.' + field] = "";
-        fieldList = fieldList + "," + field ;
+        this.data["'" + datasource + "." + repeator + "." + field + "'"] = "";
+        console.log("data" + "'" + datasource + "." + repeator + "." + field + "':" + this.data["'" + datasource + "." + repeator + "." + field + "'"])
+        fieldList = fieldList + "," + field;
         //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
         strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj.' + field + '}}<button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, true)">Edit</button><button class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + field + '\',i, true)">Update</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, false)">Cancel</button>');
         fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       }
       if (fieldList.length > 0) fieldList = fieldList.substring(1);
-      let addNewSection = this.AddNewAddInputSaveSection(sAddNewHeader, mainTag, repeator, sField,fieldList, datasource);
+      let addNewSection = this.AddNewAddInputSaveSection(sAddNewHeader, mainTag, repeator, sField, fieldList, datasource);
 
       if (strReplaceAll.indexOf(sRepeator) !== iRepeator)
         iRepeator = strReplaceAll.indexOf(sRepeator);
       else iRepeator = -1;
       strReplaceAll = strReplaceAll.substring(0, sectionStart) + addNewSection + strReplaceAll.substring(sectionStart);
     }
-
+    strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', "");
+    strReplaceAll = strReplaceAll.replace(' id="' + repeator + '"', "");
     return strReplaceAll;
   }
   GetAddNewSection(s: string, mainTag: string, repeator: string): string {
@@ -327,7 +343,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     // s = s.substring(0, firstInnerEnd) + '<button class="btn btn-primary-outline btn-sm" (click)="AddNew(\'' + repeator + '\',i, true)">Add</button>' +  s.substring(firstInnerEnd + 1);
     return s;
   }
-  AddNewAddInputSaveSection(s: string, mainTag: string, repeator: string, sField: string,fieldList: string, datasource: string): string {
+  AddNewAddInputSaveSection(s: string, mainTag: string, repeator: string, sField: string, fieldList: string, datasource: string): string {
     let isFirst = true;
     var field = "";
     let fieldStart = s.lastIndexOf(sField, s.length);
@@ -339,12 +355,15 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       let sectionEnd = s.indexOf("</" + detailTag + ">", detailStart);
 
       field = this.GetAttributeValue(s, detailStart, sField);
+      console.log("DData:" + JSON.stringify(this.data));
+      
       //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
       if (isFirst) {
-        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[' + datasource + '.' + repeator + '.' + field + ']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\')">Save</button>');
+        //console.log("this.data:" + this.data[datasource + '.' + repeator + '.' + field])
+        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + '.' + field + '\']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',data)">Save</button>');
         isFirst = false;
       } else {
-        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[' + datasource + '.' + repeator + '.' + field + ']">');
+        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + '.' + field + '\']">');
       }
       fieldStart = s.lastIndexOf(sField, sectionEnd);
     }
@@ -357,25 +376,25 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   Update(ds: string, rep: string, field: string, index: number) {
     console.log("SetEdit:" + ds + rep + field + index);
   }
-  UpdateNew(ds: string, rep: string, fieldList: string) {
-    console.log("UpdateNew:" + ds + rep + fieldList);
-    if (ds !== undefined) {
-      var nl = fieldList.split(',');
-      let d = (new Date()).toISOString().substr(0, 10);
-      const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + d);
-      let dataname = ds + '.' + rep + '.' + nl; 
-      for (var i = 0; i < nl.length; i++) {
-        let n = nl[i];
-        console.log("dataall:" + JSON.stringify(this.data[dataname]) );
+  // UpdateNew(ds: string, rep: string, fieldList: string) {
+  //   console.log("UpdateNew:" + ds + rep + fieldList);
+  //   if (ds !== undefined) {
+  //     var nl = fieldList.split(',');
+  //     let d = (new Date()).toISOString().substr(0, 10);
+  //     const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + d);
+  //     let dataname ="'" + ds + "." + rep + "." + nl + "'";
+  //     for (var i = 0; i < nl.length; i++) {
+  //       let n = nl[i];
+  //       console.log("dataall:" + this.data[dataname]);
 
-        item.update({
-          n: (this.data[dataname] === undefined) ? " " : this.data[dataname]
-        });
+  //       item.update({
+  //         n: (this.data[dataname] === undefined) ? " " : this.data[dataname]
+  //       });
 
-      }
-    }    
-  }
-  
+  //     }
+  //   }
+  // }
+
   GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
     let start = strReplaceAll.indexOf(find, sectionStart) + find.length;
     if (start > 0) {
