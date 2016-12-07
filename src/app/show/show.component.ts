@@ -19,7 +19,7 @@ import { ActivatedRoute } from '@angular/router';
   <div #dynamicContentPlaceHolder></div>  <hr />
 </div>
 `,
-  
+
   // data: <pre>{{data | json}}</pre>
   // exdata: <pre>{{exdata | json}}</pre>  
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
@@ -40,6 +40,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   static namelist: string[] = [];
   public repeatorVarList: string[] = [];
 
+  public datanewrow = {};
   public repeatorData = [];
 
   static html: string;
@@ -47,6 +48,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   constructor(protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
   }
   ngOnInit() {
+
     this.sub = this.route.params.subscribe(params => {
       ShowComponent.formname = params['id'];
       this.ssHtml = this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
@@ -307,6 +309,9 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
       let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       let fieldList = "";
+
+      // this.datanewrow['f03.t1.f1'] = "";
+      // this.datanewrow['f03.t1.f2'] = "";
       while (fieldStart != -1) {
         let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
         //console.log("START:" + detailStart );
@@ -315,14 +320,15 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
 
         field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
-        this.data["'" + datasource + "." + repeator + "." + field + "'"] = "";
-        console.log("data" + "'" + datasource + "." + repeator + "." + field + "':" + this.data["'" + datasource + "." + repeator + "." + field + "'"])
+        this.data["'" + datasource + "." + repeator + "." + field + "'"] = "11";
+        console.log("data" + "'" + datasource + "." + repeator + "." + field + "':" + this.datanewrow["'" + datasource + "." + repeator + "." + field + "'"])
         fieldList = fieldList + "," + field;
         //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
         strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj.' + field + '}}<button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, true)">Edit</button><button class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + field + '\',i, true)">Update</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, false)">Cancel</button>');
         fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       }
       if (fieldList.length > 0) fieldList = fieldList.substring(1);
+      
       let addNewSection = this.AddNewAddInputSaveSection(sAddNewHeader, mainTag, repeator, sField, fieldList, datasource);
 
       if (strReplaceAll.indexOf(sRepeator) !== iRepeator)
@@ -346,26 +352,36 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   AddNewAddInputSaveSection(s: string, mainTag: string, repeator: string, sField: string, fieldList: string, datasource: string): string {
     let isFirst = true;
     var field = "";
-    let fieldStart = s.lastIndexOf(sField, s.length);
+    let fieldStart = s.indexOf(sField, 0);
+    //console.log("s===" + s);
+    //console.log("sField" + sField);
+    //console.log("fieldStart" + fieldStart);
+          let newrowvarList = "";
     while (fieldStart != -1) {
       let detailStart = s.lastIndexOf("<", fieldStart);
       //console.log("START:" + detailStart );
       let detailTagEnd = s.indexOf(" ", detailStart);
       let detailTag = s.substring(detailStart + 1, detailTagEnd);
       let sectionEnd = s.indexOf("</" + detailTag + ">", detailStart);
+     // console.log(" s =" + s + "detailStart" + detailStart + sField);
+      field = this.GetAttributeValue(s, detailStart -1, sField);
+      //console.log(" field =xx:" + field);
+        newrowvarList = newrowvarList + ',data[\'' + datasource + '.' + repeator + "." + field + '\']' ;
 
-      field = this.GetAttributeValue(s, detailStart, sField);
-      console.log("DData:" + JSON.stringify(this.data));
-      
       //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
-      if (isFirst) {
+      if (fieldStart === s.lastIndexOf(sField, s.length)) {
         //console.log("this.data:" + this.data[datasource + '.' + repeator + '.' + field])
-        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + '.' + field + '\']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',data)">Save</button>');
+        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + "." + field + '\']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\'' + newrowvarList + ')">Save</button>');
+        // s = s.replace(sField + field + '">', '><input [(ngModel)]="datanewrow[\'' + datasource + '.' + repeator + "."  + field + '\']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',datanewrow)">Save</button>');        
         isFirst = false;
-      } else {
-        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + '.' + field + '\']">');
+        return s;
       }
-      fieldStart = s.lastIndexOf(sField, sectionEnd);
+      else {
+        s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + "." + field + '\']">');
+      }
+      fieldStart = s.indexOf(sField, 0);
+     // console.log("s222" + s);
+      //console.log("fieldStart222" + fieldStart);
     }
     return s;
   }
@@ -397,8 +413,12 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
   GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
     let start = strReplaceAll.indexOf(find, sectionStart) + find.length;
+    
+    //console.log("strReplaceAll:" + strReplaceAll);
+    //console.log("startXXXX:" + start);
     if (start > 0) {
       let end = strReplaceAll.indexOf('"', start);
+      //console.log("endXXXX:" + end + " ooooo:" + strReplaceAll.substring(start, end));
       return strReplaceAll.substring(start, end);
     }
     return "";
@@ -425,7 +445,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var template = ShowComponent.html;
 
     this.typeBuilder
-      .createComponentFactory(template)
+      .createComponentFactory(template, this.data)
       .then((factory: ComponentFactory<IHaveDynamicData>) => {
         // Target will instantiate and inject component (we'll keep reference to it)
         this.componentRef = this

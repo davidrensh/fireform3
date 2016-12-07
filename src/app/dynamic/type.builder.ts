@@ -7,7 +7,8 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 export interface IHaveDynamicData {
     exdata: any;
     data: any;
-    UpdateNew(ds: string, rep: string, fieldList: string, xdata: any): void;
+    datanewrow: any;
+    UpdateNew(ds: string, rep: string, fieldList: string, v1:any, v2:any, v3:any, v4:any, v5:any): void;
 }
 
 @Injectable()
@@ -21,7 +22,7 @@ export class DynamicTypeBuilder {
     // this object is singleton - so we can use this as a cache
     private _cacheOfFactories: { [templateKey: string]: ComponentFactory<IHaveDynamicData> } = {};
 
-    public createComponentFactory(template: string)
+    public createComponentFactory(template: string, mydata: any)
         : Promise<ComponentFactory<IHaveDynamicData>> {
 
         let factory = this._cacheOfFactories[template];
@@ -35,7 +36,7 @@ export class DynamicTypeBuilder {
         }
 
         // unknown template ... let's create a Type for it
-        let type = this.createNewComponent(template);
+        let type = this.createNewComponent(template, mydata);
         let module = this.createComponentModule(type);
 
         return new Promise((resolve) => {
@@ -51,7 +52,7 @@ export class DynamicTypeBuilder {
         });
     }
 
-    protected createNewComponent(tmpl: string) {
+    protected createNewComponent(tmpl: string, mydata: any) {
         @Component({
             selector: 'dynamic-component',
             template: tmpl,
@@ -59,9 +60,10 @@ export class DynamicTypeBuilder {
         class CustomDynamicComponent implements IHaveDynamicData {
             @Input() exdata: any;
             @Input() data: any;
+            @Input() datanewrow: any; 
             constructor(public af: AngularFire) {
             }
-            UpdateNew(ds: string, rep: string, fieldList: string, data : any) {
+            UpdateNew(ds: string, rep: string, fieldList: string, v1:any, v2:any, v3:any, v4:any, v5:any) {
                 console.log("UpdateNew:" + ds + rep + fieldList);
                 if (ds !== undefined) {
                     var nl = fieldList.split(',');
@@ -71,14 +73,18 @@ export class DynamicTypeBuilder {
                     //console.log("dataname:" + dataname );
                     for (var i = 0; i < nl.length; i++) {
                         let n = nl[i];
-                        
-                        let dataname = "'" + ds + "." + rep + "." + n + "'";
-                        console.log("dataname:" + n);
-                        console.log("data:" + data);
-                        console.log("dataall:" + dataname + data[dataname]);
 
+                        let dataname = "'" + ds + "." + rep + n + "'";
+                        console.log("dataname:" + dataname);
+                        //console.log("data:" + mydata);
+                        console.log("data['f03.aa']" + mydata['f03.aa']);
+                        console.log("dataall:" + dataname + mydata[dataname]);
+                        console.log("ddd:" + mydata[dataname]);
+                        console.log("v1:" + v1);
+                        console.log("v2:" + v2);
+                        console.log("v3:" + v3);
                         item.update({
-                            n: (data[dataname] === undefined) ? " " : data[dataname]
+                            n: (mydata[dataname] === undefined) ? " " : mydata[dataname]
                         });
 
                     }
