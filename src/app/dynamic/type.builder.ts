@@ -64,30 +64,21 @@ export class DynamicTypeBuilder {
             constructor(public af: AngularFire) {
             }
             UpdateNew(ds: string, rep: string, fieldList: string, v1:any, v2:any, v3:any, v4:any, v5:any) {
-                console.log("UpdateNew:" + ds + rep + fieldList);
+                //console.log("UpdateNew:" + ds + rep + fieldList);
+                //console.log("XX This eval v1 v2 v3:" + eval("v1") + eval("v2") + eval("v3"));
+                let pl = "";
                 if (ds !== undefined) {
                     var nl = fieldList.split(',');
-                    let d = (new Date()).toISOString().substr(0, 10);
-                    const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + d);
+                    //let d = (new Date()).toISOString().substr(0, 10);
+                    const item = this.af.database.list("/forms/" + ds + "/data/block/" + rep );
                     //let dataname = "'" + ds + "." + rep + "." + nl + "'";
                     //console.log("dataname:" + dataname );
                     for (var i = 0; i < nl.length; i++) {
                         let n = nl[i];
-
-                        let dataname = "'" + ds + "." + rep + n + "'";
-                        console.log("dataname:" + dataname);
-                        //console.log("data:" + mydata);
-                        console.log("data['f03.aa']" + mydata['f03.aa']);
-                        console.log("dataall:" + dataname + mydata[dataname]);
-                        console.log("ddd:" + mydata[dataname]);
-                        console.log("v1:" + v1);
-                        console.log("v2:" + v2);
-                        console.log("v3:" + v3);
-                        item.update({
-                            n: (mydata[dataname] === undefined) ? " " : mydata[dataname]
-                        });
-
+                       // let dataname = "'" + ds + "." + rep + "." + n + "'";
+                        pl = pl + n + ': v' + n.substring(1) + ',';
                     }
+                    eval('item.push({' + pl + '});');
                 }
             }
         };
