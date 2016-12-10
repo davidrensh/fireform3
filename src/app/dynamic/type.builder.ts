@@ -89,7 +89,7 @@ export class DynamicTypeBuilder {
                     let s = "/forms/" + ds + "/data/block/" + rep;
                     let sname =  ds + "." + rep ;
                     // console.log("Call222y n=" + n + "pos=" + pos + " ds=" + ds + " rep=" + rep);
-                    // console.log("CalDDDy " + sname + "?='f03.t1' " +  " s=/forms/f03/data/block/t1 ?=" + s);
+                   //  console.log("CalDDDy " + sname + "?='f03.t1' " +  " s=/forms/f03/data/block/t1 ?=" + s);
                     this.listobj[sname] = this.af.database.list(s);
                 }
                 //this.isDsLoaded = true;
@@ -112,7 +112,7 @@ export class DynamicTypeBuilder {
                 // }
             }
             getlist(ds: string, rep: string): any {
-                console.log("XXX:" + ds + '.' + rep);
+               // console.log("XXX:" + "/forms/" + ds + "/data/block/" + rep);
                 //this.listobj[ds + '.' + rep]  = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
                 // var a = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
                 return this.listobj[ds + '.' + rep];
