@@ -143,8 +143,9 @@ export class DynamicTypeBuilder {
                     //console.log("dataname:" + dataname );
                     for (var i = 0; i < nl.length; i++) {
                         let n = nl[i];
+                        let k = i + 1;
                         // let dataname = "'" + ds + "." + rep + "." + n + "'";
-                        pl = pl + n + ': v' + n.substring(1) + ',';
+                        pl = pl + n + ': v' + k  + ',';
                     }
                     eval('item.push({' + pl + '});');
                 }
