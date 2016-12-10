@@ -311,7 +311,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         //this.repeatorData[repeator] = null;
       }
 
-      strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of ' + ds + ' | async"');
+      strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of getlist(\'' + datasource + '\',\'' + repeator + '\') | async"');
       let sAddNewHeader = this.GetAddNewSection(sMainTagSection, mainTag, repeator);
       //let sAddNewSection = this.GetAddNewSection(sMainTagSection);
 
@@ -320,6 +320,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
       // this.datanewrow['f03.t1.f1'] = "";
       // this.datanewrow['f03.t1.f2'] = "";
+      let isLast = true;
       while (fieldStart != -1) {
         let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
         //console.log("START:" + detailStart );
@@ -328,12 +329,16 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
 
         field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
-        this.data["'" + datasource + "." + repeator + "." + field + "'"] = "11";
-        console.log("data" + "'" + datasource + "." + repeator + "." + field + "':" + this.datanewrow["'" + datasource + "." + repeator + "." + field + "'"])
+        //this.data["'" + datasource + "." + repeator + "." + field + "'"] = "11";
+        //console.log("data" + "'" + datasource + "." + repeator + "." + field + "':" + this.datanewrow["'" + datasource + "." + repeator + "." + field + "'"])
         fieldList = fieldList + "," + field;
         //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
-        // strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj.' + field + '}}<button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, true)">Edit</button><button class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + field + '\',i, true)">Update</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + repeator + '\',\'' + field + '\',i, false)">Cancel</button>');
-        strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj["' + field + '"]}}');
+        if (isLast) {
+          strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj.' + field + '}}<button class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key, true)">Edit</button><button class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key, true)">Update</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key,false)">Cancel</button>');
+          isLast = false;
+        }
+        else
+         strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj["' + field + '"]}}');
         fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
       }
       if (fieldList.length > 0) fieldList = fieldList.substring(1);
@@ -395,12 +400,6 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     return s;
   }
 
-  SetEdit(rep: string, field: string, index: number) {
-    console.log("SetEdit:" + rep + field + index);
-  }
-  Update(ds: string, rep: string, field: string, index: number) {
-    console.log("SetEdit:" + ds + rep + field + index);
-  }
   // UpdateNew(ds: string, rep: string, fieldList: string) {
   //   console.log("UpdateNew:" + ds + rep + fieldList);
   //   if (ds !== undefined) {
