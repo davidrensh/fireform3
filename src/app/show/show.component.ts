@@ -39,7 +39,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   public roweditvalue = {};
   static namelist: string[] = [];
   public repeatorVarList: string[] = [];
-
+  public dstable = {};
   public datanewrow = {};
   public repeatorData = [];
 
@@ -290,15 +290,15 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       let ds = "";
       if (datasource !== null && datasource !== "" && repeator !== "") {
         ds = "data['" + datasource + "." + repeator + "']";
-        this.data["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
-
-        const o1 = this.data["'" + datasource + "." + repeator + "'"];
-        o1.subscribe(items => {
-              items.map(item => {
-                console.log("List value:" + item + item.f1 + item.f2);
-              });
-            }
-            );
+        // this.data["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
+        this.dstable["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
+        // const o1 = this.data["'" + datasource + "." + repeator + "'"];
+        // o1.subscribe(items => {
+        //       items.map(item => {
+        //         console.log("List value:" + item + item.f1 + item.f2);
+        //       });
+        //     }
+        //     );
         //this.repeatorData[datasource + '.' + repeator] = null;
 
         // ds = "repeatorData['" + datasource + "']";
@@ -306,7 +306,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         // this.repeatorData[datasource] = null;
       } else if (repeator !== "") {
         ds = "data['" + repeator + "']";
-        this.data["'" + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
+        this.dstable["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
+       // this.data["'" + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
         //console.log("repeatorDataB:" + JSON.stringify(this.repeatorData[repeator]));
         //this.repeatorData[repeator] = null;
       }
@@ -315,34 +316,53 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       let sAddNewHeader = this.GetAddNewSection(sMainTagSection, mainTag, repeator);
       //let sAddNewSection = this.GetAddNewSection(sMainTagSection);
 
-      let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
+      /////////////
+      // let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
+      // let fieldList = "";
+
+      // let isLast = true;
+      // while (fieldStart != -1) {
+      //   let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
+      //   let detailTagEnd = strReplaceAll.indexOf(" ", detailStart);
+      //   let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd);
+      //   let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
+
+      //   field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
+      //   fieldList = fieldList + "," + field;
+      //   if (isLast) {
+      //     strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj.' + field + '}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + datasource + '.' + repeator + "."  + field + '\']"><button *ngIf="!rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key, true)">Edit</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key, true)">Update</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key,false)">Cancel</button>');
+      //     isLast = false;
+      //   }
+      //   else
+      //    strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj["' + field + '"]}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + datasource + '.' + repeator + "." + field + '\']">');
+      //   fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
+      // }      
+      /////////////      
+
+      let fieldStart = strReplaceAll.indexOf(sField, 0);
       let fieldList = "";
 
-      // this.datanewrow['f03.t1.f1'] = "";
-      // this.datanewrow['f03.t1.f2'] = "";
-      let isLast = true;
+      //let isLast = true;
       while (fieldStart != -1) {
         let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
-        //console.log("START:" + detailStart );
         let detailTagEnd = strReplaceAll.indexOf(" ", detailStart);
         let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd);
         let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
 
         field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
-        //this.data["'" + datasource + "." + repeator + "." + field + "'"] = "11";
-        //console.log("data" + "'" + datasource + "." + repeator + "." + field + "':" + this.datanewrow["'" + datasource + "." + repeator + "." + field + "'"])
         fieldList = fieldList + "," + field;
-        //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
-        if (isLast) {
-          strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj.' + field + '}}<button class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key, true)">Edit</button><button class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key, true)">Update</button><button class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key,false)">Cancel</button>');
-          isLast = false;
+        if (fieldStart === strReplaceAll.lastIndexOf(sField, strReplaceAll.length)) {
+          if (fieldList.length > 0 && fieldList.substring(0, 1) === ',') fieldList = fieldList.substring(1);
+          strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj.' + field + '}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + field + '\']"><button *ngIf="!rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj)">Edit</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key)">Update</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="CancelEdit(dataobj.$key)">Cancel</button>');
+
         }
         else
-         strReplaceAll = strReplaceAll.replace(sField + field + '">', '>{{dataobj["' + field + '"]}}');
-        fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
+          strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj.' + field + '}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key +\'' + field + '\']">');
+        fieldStart = strReplaceAll.indexOf(sField, 0);
       }
-      if (fieldList.length > 0) fieldList = fieldList.substring(1);
-      
+
+
+
       let addNewSection = this.AddNewAddInputSaveSection(sAddNewHeader, mainTag, repeator, sField, fieldList, datasource);
 
       if (strReplaceAll.indexOf(sRepeator) !== iRepeator)
@@ -364,37 +384,37 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     return s;
   }
   AddNewAddInputSaveSection(s: string, mainTag: string, repeator: string, sField: string, fieldList: string, datasource: string): string {
-    let isFirst = true;
+    //let isFirst = true;
     var field = "";
     let fieldStart = s.indexOf(sField, 0);
     //console.log("s===" + s);
     //console.log("sField" + sField);
     //console.log("fieldStart" + fieldStart);
-          let newrowvarList = "";
+    let newrowvarList = "";
     while (fieldStart != -1) {
       let detailStart = s.lastIndexOf("<", fieldStart);
       //console.log("START:" + detailStart );
       let detailTagEnd = s.indexOf(" ", detailStart);
       let detailTag = s.substring(detailStart + 1, detailTagEnd);
       let sectionEnd = s.indexOf("</" + detailTag + ">", detailStart);
-     // console.log(" s =" + s + "detailStart" + detailStart + sField);
-      field = this.GetAttributeValue(s, detailStart -1, sField);
+      // console.log(" s =" + s + "detailStart" + detailStart + sField);
+      field = this.GetAttributeValue(s, detailStart - 1, sField);
       //console.log(" field =xx:" + field);
-        newrowvarList = newrowvarList + ',data[\'' + datasource + '.' + repeator + "." + field + '\']' ;
+      newrowvarList = newrowvarList + ',data[\'' + datasource + '.' + repeator + "." + field + '\']';
 
       //console.log("END:" + detailTag +  detailTagEnd  + " filed" + field);
       if (fieldStart === s.lastIndexOf(sField, s.length)) {
         //console.log("this.data:" + this.data[datasource + '.' + repeator + '.' + field])
         s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + "." + field + '\']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\'' + newrowvarList + ')">Save</button>');
         // s = s.replace(sField + field + '">', '><input [(ngModel)]="datanewrow[\'' + datasource + '.' + repeator + "."  + field + '\']">&nbsp;<button class="btn btn-primary-outline btn-sm" (click)="UpdateNew(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',datanewrow)">Save</button>');        
-        isFirst = false;
+        //isFirst = false;
         return s;
       }
       else {
         s = s.replace(sField + field + '">', '><input [(ngModel)]="data[\'' + datasource + '.' + repeator + "." + field + '\']">');
       }
       fieldStart = s.indexOf(sField, 0);
-     // console.log("s222" + s);
+      // console.log("s222" + s);
       //console.log("fieldStart222" + fieldStart);
     }
     return s;
@@ -421,7 +441,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
   GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
     let start = strReplaceAll.indexOf(find, sectionStart) + find.length;
-    
+
     //console.log("strReplaceAll:" + strReplaceAll);
     //console.log("startXXXX:" + start);
     if (start > 0) {
@@ -464,6 +484,9 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let component = this.componentRef.instance;
 
         component.data = this.data;
+       // console.log("Listobj:" + this.dstable);
+        //component.listobj = this.dstable;
+        //component.InitialList(this.dstable);
       });
   }
 

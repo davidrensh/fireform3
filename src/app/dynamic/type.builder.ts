@@ -8,12 +8,12 @@ export interface IHaveDynamicData {
     exdata: any;
     data: any;
     datanewrow: any;
-    SetEdit(rkey: string): void;
-
-    UpdateNew(ds: string, rep: string, fieldList: string, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any, v10: any
-        , v11: any, v12: any, v13: any, v14: any, v15: any, v16: any, v17: any, v18: any, v19: any, v20: any
-        , v21: any, v22: any, v23: any, v24: any, v25: any, v26: any, v27: any, v28: any, v29: any, v30: any
-        , v31: any, v32: any, v33: any, v34: any, v35: any, v36: any, v37: any, v38: any, v39: any, v40: any): void;
+    //listobj: any;
+    InitialList(dstable: any): void;
+    // UpdateNew(ds: string, rep: string, fieldList: string, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any, v10: any
+    //     , v11: any, v12: any, v13: any, v14: any, v15: any, v16: any, v17: any, v18: any, v19: any, v20: any
+    //     , v21: any, v22: any, v23: any, v24: any, v25: any, v26: any, v27: any, v28: any, v29: any, v30: any
+    //     , v31: any, v32: any, v33: any, v34: any, v35: any, v36: any, v37: any, v38: any, v39: any, v40: any): void;
 }
 
 @Injectable()
@@ -66,18 +66,60 @@ export class DynamicTypeBuilder {
             @Input() exdata: any;
             @Input() data: any;
             @Input() datanewrow: any;
-            public listobj = {};
+            //@Input() listobj: any;
+            public listobj  = {};
+            public rowediting = {};
+            public rowdata = {};
             constructor(public af: AngularFire) {
                 this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
             }
+            public InitialList(dstable: any) {
+                console.log("Call!!XXXX" + dstable.length + JSON.stringify(dstable));
+                for (var item in dstable) {
+                    let n: string = item;
+                    let pos = n.indexOf('.', 0);
+                    let ds = n.substring(0, pos);
+                    let rep = n.substring(pos + 1);
+                    console.log("Call222y " + n + pos + ds + rep);
+                    this.listobj[n] = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
+                }
+                // dstable.forEach((item, index) => {
+                //     let n: string = item;
+                //     let pos = n.indexOf('.', 0);
+                //     let ds = n.substring(0, pos);
+                //     let rep = n.substring(pos + 1);
+                //     console.log("Call222y " + n + pos + ds + rep);
+                //     this.listobj[n] = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
+                // });
+                // for (var i = 0; i < dstable.length; i++) {
+
+                //     let n: string = dstable[i];
+                //     let pos = n.indexOf('.', 0);
+                //     let ds = n.substring(0, pos);
+                //     let rep = n.substring(pos + 1);
+                //     console.log("Call222y " + n + pos + ds + rep);
+                //     this.listobj[n] = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
+                // }
+            }
             getlist(ds: string, rep: string): any {
+                console.log("XXX:" + ds + '.' + rep);
                 return this.listobj[ds + '.' + rep];
             }
 
-            SetEdit(rkey: string) {
-                console.log("SetEdit:" + rkey);
+            SetEdit(ds: string, rep: string, fieldlist: string, obj: any): void {
+                console.log("SetEdit:" + obj.$key);
+                this.rowediting[obj.$key] = true;
+                var nl = fieldlist.split(',');
+                for (var i = 0; i < nl.length; i++) {
+                    let n = nl[i];
+                    this.rowdata[obj.$key + n] = obj[n];// eval('dataobj.' + n);
+                }
             }
-            Update(ds: string, rep: string, fieldlist: string, rkey: string) {
+            CancelEdit(rkey: string): void {
+                console.log("SetEdit:" + rkey);
+                this.rowediting[rkey] = false;;
+            }
+            Update(ds: string, rep: string, fieldlist: string, rkey: string): void {
                 console.log("SetEdit:" + ds + rep + fieldlist + rkey);
             }
             UpdateNew(ds: string, rep: string, fieldList: string
