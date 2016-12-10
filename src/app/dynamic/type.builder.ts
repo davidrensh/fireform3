@@ -80,7 +80,6 @@ export class DynamicTypeBuilder {
                 this.InitialList(dtable);
             }
             public InitialList(dstable: any) {
-                //console.log("Call!!XXXX" + dstable.length + JSON.stringify(dstable));
                 for (var item in dstable) {
                     let n: string = item;
                     let pos = n.indexOf('.', 0);
@@ -88,35 +87,13 @@ export class DynamicTypeBuilder {
                     let rep = n.substring(pos + 1, n.length - 1);
                     let s = "/forms/" + ds + "/data/block/" + rep;
                     let sname =  ds + "." + rep ;
-                    // console.log("Call222y n=" + n + "pos=" + pos + " ds=" + ds + " rep=" + rep);
-                   //  console.log("CalDDDy " + sname + "?='f03.t1' " +  " s=/forms/f03/data/block/t1 ?=" + s);
+
                     this.listobj[sname] = this.af.database.list(s);
                 }
-                //this.isDsLoaded = true;
-                // dstable.forEach((item, index) => {
-                //     let n: string = item;
-                //     let pos = n.indexOf('.', 0);
-                //     let ds = n.substring(0, pos);
-                //     let rep = n.substring(pos + 1);
-                //     console.log("Call222y " + n + pos + ds + rep);
-                //     this.listobj[n] = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
-                // });
-                // for (var i = 0; i < dstable.length; i++) {
-
-                //     let n: string = dstable[i];
-                //     let pos = n.indexOf('.', 0);
-                //     let ds = n.substring(0, pos);
-                //     let rep = n.substring(pos + 1);
-                //     console.log("Call222y " + n + pos + ds + rep);
-                //     this.listobj[n] = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
-                // }
+               
             }
             getlist(ds: string, rep: string): any {
-               // console.log("XXX:" + "/forms/" + ds + "/data/block/" + rep);
-                //this.listobj[ds + '.' + rep]  = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
-                // var a = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
                 return this.listobj[ds + '.' + rep];
-                //return  this.af.database.list("/forms/" + ds + "/data/block/" + rep);
             }
 
             SetEdit(ds: string, rep: string, fieldlist: string, obj: any): void {
@@ -128,8 +105,12 @@ export class DynamicTypeBuilder {
                     this.rowdata[obj.$key + n] = obj[n];// eval('dataobj.' + n);
                 }
             }
+            DeleteRow(ds: string, rep: string, rkey: string): void {
+                console.log("Delete row:" + rkey);
+                this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + rkey).remove();
+            }
             CancelEdit(rkey: string): void {
-                console.log("SetEdit:" + rkey);
+                console.log("Cancel:" + rkey);
                 this.rowediting[rkey] = false;;
             }
             Update(ds: string, rep: string, fieldlist: string, rkey: string): void {
@@ -138,18 +119,13 @@ export class DynamicTypeBuilder {
 
                 let pl = "";
                 var nl = fieldlist.split(',');
-                //let d = (new Date()).toISOString().substr(0, 10);
                 const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + rkey);
-                //let dataname = "'" + ds + "." + rep + "." + nl + "'";
-                //console.log("dataname:" + dataname );
                 for (var i = 0; i < nl.length; i++) {
                     let n = nl[i];
-                    // let dataname = "'" + ds + "." + rep + "." + n + "'";
                     pl = pl + n + ': ' + this.rowdata[rkey + n] + ',';
                 }
                 pl = pl.substring(0, pl.length - 1);
                 let ss = 'item.update({' + pl + '});';
-                console.log("Update script:" + ss)
                 eval(ss);
             }
             UpdateNew(ds: string, rep: string, fieldList: string

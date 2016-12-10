@@ -315,30 +315,6 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
       strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', ' *ngFor="let dataobj of getlist(\'' + datasource + '\',\'' + repeator + '\') | async"');
       let sAddNewHeader = this.GetAddNewSection(sMainTagSection, mainTag, repeator);
-      //let sAddNewSection = this.GetAddNewSection(sMainTagSection);
-
-      /////////////
-      // let fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
-      // let fieldList = "";
-
-      // let isLast = true;
-      // while (fieldStart != -1) {
-      //   let detailStart = strReplaceAll.lastIndexOf("<", fieldStart);
-      //   let detailTagEnd = strReplaceAll.indexOf(" ", detailStart);
-      //   let detailTag = strReplaceAll.substring(detailStart + 1, detailTagEnd);
-      //   let sectionEnd = strReplaceAll.indexOf("</" + detailTag + ">", detailStart);
-
-      //   field = this.GetAttributeValue(strReplaceAll, detailStart, sField);
-      //   fieldList = fieldList + "," + field;
-      //   if (isLast) {
-      //     strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj.' + field + '}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + datasource + '.' + repeator + "."  + field + '\']"><button *ngIf="!rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key, true)">Edit</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key, true)">Update</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(dataobj.$key,false)">Cancel</button>');
-      //     isLast = false;
-      //   }
-      //   else
-      //    strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj["' + field + '"]}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + datasource + '.' + repeator + "." + field + '\']">');
-      //   fieldStart = strReplaceAll.lastIndexOf(sField, sectionEnd);
-      // }      
-      /////////////      
 
       let fieldStart = strReplaceAll.indexOf(sField, 0);
       let fieldList = "";
@@ -354,7 +330,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         fieldList = fieldList + "," + field;
         if (fieldStart === strReplaceAll.lastIndexOf(sField, strReplaceAll.length)) {
           if (fieldList.length > 0 && fieldList.substring(0, 1) === ',') fieldList = fieldList.substring(1);
-          strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj.' + field + '}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + field + '\']"><button *ngIf="!rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj)">Edit</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key)">Update</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="CancelEdit(dataobj.$key)">Cancel</button>');
+          strReplaceAll = strReplaceAll.replace(sField + field + '">', '><label *ngIf="!rowediting[dataobj.$key]">{{dataobj.' + field + '}}</label><input *ngIf="rowediting[dataobj.$key]" [(ngModel)]="rowdata[dataobj.$key + \'' + field + '\']"><button *ngIf="!rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="SetEdit(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj)">Edit</button><button *ngIf="!rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="DeleteRow(\'' + datasource + '\',\'' + repeator + '\',dataobj.$key)">Delete</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="Update(\'' + datasource + '\',\'' + repeator + '\',\'' + fieldList + '\',dataobj.$key)">Update</button><button *ngIf="rowediting[dataobj.$key]" class="btn btn-primary-outline btn-sm" (click)="CancelEdit(dataobj.$key)">Cancel</button>');
 
         }
         else
