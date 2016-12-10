@@ -67,7 +67,7 @@ export class DynamicTypeBuilder {
             @Input() data: any;
             @Input() datanewrow: any;
             //@Input() listobj: any;
-            public listobj  = {};
+            public listobj = {};
             public rowediting = {};
             public rowdata = {};
             constructor(public af: AngularFire) {
@@ -120,31 +120,30 @@ export class DynamicTypeBuilder {
                 this.rowediting[rkey] = false;;
             }
             Update(ds: string, rep: string, fieldlist: string, rkey: string): void {
-                console.log("SetEdit:" + ds + rep + fieldlist + rkey);
+                console.log("Update:" + ds + rep + fieldlist + rkey);
+                this.rowediting[rkey] = false;
+
+                let pl = "";
+                var nl = fieldlist.split(',');
+                //let d = (new Date()).toISOString().substr(0, 10);
+                const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + rkey);
+                //let dataname = "'" + ds + "." + rep + "." + nl + "'";
+                //console.log("dataname:" + dataname );
+                for (var i = 0; i < nl.length; i++) {
+                    let n = nl[i];
+                    // let dataname = "'" + ds + "." + rep + "." + n + "'";
+                    pl = pl + n + ': ' + this.rowdata[rkey + n] + ',';
+                }
+                pl = pl.substring(0, pl.length - 1);
+                let ss = 'item.update({' + pl + '});';
+                console.log("Update script:" + ss)
+                eval(ss);
             }
             UpdateNew(ds: string, rep: string, fieldList: string
                 , v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any, v10: any
                 , v11: any, v12: any, v13: any, v14: any, v15: any, v16: any, v17: any, v18: any, v19: any, v20: any
                 , v21: any, v22: any, v23: any, v24: any, v25: any, v26: any, v27: any, v28: any, v29: any, v30: any
                 , v31: any, v32: any, v33: any, v34: any, v35: any, v36: any, v37: any, v38: any, v39: any, v40: any) {
-                console.log("UpdateNew:" + ds + rep + fieldList);
-                console.log("XX This eval v1 v2 v3:" + eval("v1") + eval("v2") + eval("v3"));
-                const o = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/-KYa4A9VXc5vV2WbGQti");
-                o.subscribe(res => {
-                    console.log("OO:" + res.f1 + res.f2 + JSON.stringify(res));
-                    // res.map(item => {
-                    //     console.log("OO2:" + item.f1 + item.f2);
-                    // });
-                }
-                );
-                const o2 = this.af.database.object("/forms/" + ds + "/data/chkFemale");
-                o2.subscribe(res => {
-                    console.log("OO2:" + res.value + JSON.stringify(res));
-                    // res.map(item => {
-                    //     console.log("OO2:" + item.f1 + item.f2);
-                    // });
-                }
-                );
 
                 let pl = "";
                 if (ds !== undefined) {
