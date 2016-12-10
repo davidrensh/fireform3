@@ -57,7 +57,7 @@ export class DynamicTypeBuilder {
         });
     }
 
-    protected createNewComponent(tmpl: string, mydata: any) {
+    protected createNewComponent(tmpl: string, dtable: any) {
         @Component({
             selector: 'dynamic-component',
             template: tmpl,
@@ -71,7 +71,8 @@ export class DynamicTypeBuilder {
             public rowediting = {};
             public rowdata = {};
             constructor(public af: AngularFire) {
-                this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
+                //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
+                this.InitialList(dtable);
             }
             public InitialList(dstable: any) {
                 console.log("Call!!XXXX" + dstable.length + JSON.stringify(dstable));
@@ -103,7 +104,10 @@ export class DynamicTypeBuilder {
             }
             getlist(ds: string, rep: string): any {
                 console.log("XXX:" + ds + '.' + rep);
+                //this.listobj[ds + '.' + rep]  = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
+                // var a = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
                 return this.listobj[ds + '.' + rep];
+                //return  this.af.database.list("/forms/" + ds + "/data/block/" + rep);
             }
 
             SetEdit(ds: string, rep: string, fieldlist: string, obj: any): void {

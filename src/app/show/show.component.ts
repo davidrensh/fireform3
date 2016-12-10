@@ -291,7 +291,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       if (datasource !== null && datasource !== "" && repeator !== "") {
         ds = "data['" + datasource + "." + repeator + "']";
         // this.data["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
-        this.dstable["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
+        this.dstable["'" + datasource + "." + repeator + "'"] = datasource + "." + repeator;// this.af.database.list("/forms/" + datasource + "/data/block/" + repeator);
         // const o1 = this.data["'" + datasource + "." + repeator + "'"];
         // o1.subscribe(items => {
         //       items.map(item => {
@@ -473,7 +473,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var template = ShowComponent.html;
 
     this.typeBuilder
-      .createComponentFactory(template, this.data)
+      .createComponentFactory(template, this.dstable)
       .then((factory: ComponentFactory<IHaveDynamicData>) => {
         // Target will instantiate and inject component (we'll keep reference to it)
         this.componentRef = this
