@@ -1,4 +1,4 @@
-import { Component, ComponentFactory, NgModule, Input, Injectable } from '@angular/core';
+import { Component, ComponentFactory, NgModule,OnInit, Input, Injectable } from '@angular/core';
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
@@ -62,7 +62,7 @@ export class DynamicTypeBuilder {
             selector: 'dynamic-component',
             template: tmpl,
         })
-        class CustomDynamicComponent implements IHaveDynamicData {
+        class CustomDynamicComponent implements IHaveDynamicData, OnInit {
             @Input() exdata: any;
             @Input() data: any;
             @Input() datanewrow: any;
@@ -70,20 +70,29 @@ export class DynamicTypeBuilder {
             public listobj = {};
             public rowediting = {};
             public rowdata = {};
+            public isDsLoaded = false;
             constructor(public af: AngularFire) {
+                //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
+                //this.InitialList(dtable);
+            }
+            ngOnInit() {
                 //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
                 this.InitialList(dtable);
             }
             public InitialList(dstable: any) {
-                console.log("Call!!XXXX" + dstable.length + JSON.stringify(dstable));
+                //console.log("Call!!XXXX" + dstable.length + JSON.stringify(dstable));
                 for (var item in dstable) {
                     let n: string = item;
                     let pos = n.indexOf('.', 0);
-                    let ds = n.substring(0, pos);
-                    let rep = n.substring(pos + 1);
-                    console.log("Call222y " + n + pos + ds + rep);
-                    this.listobj[n] = this.af.database.list("/forms/" + ds + "/data/block/" + rep);
+                    let ds = n.substring(1, pos);
+                    let rep = n.substring(pos + 1, n.length - 1);
+                    let s = "/forms/" + ds + "/data/block/" + rep;
+                    let sname =  ds + "." + rep ;
+                    // console.log("Call222y n=" + n + "pos=" + pos + " ds=" + ds + " rep=" + rep);
+                    // console.log("CalDDDy " + sname + "?='f03.t1' " +  " s=/forms/f03/data/block/t1 ?=" + s);
+                    this.listobj[sname] = this.af.database.list(s);
                 }
+                //this.isDsLoaded = true;
                 // dstable.forEach((item, index) => {
                 //     let n: string = item;
                 //     let pos = n.indexOf('.', 0);

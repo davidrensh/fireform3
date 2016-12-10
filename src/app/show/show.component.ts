@@ -261,6 +261,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     while (iRepeator !== undefined && iRepeator != -1) {
       // Relace out the current instance.
       let sectionStart = strReplaceAll.lastIndexOf("<", iRepeator);
+
       //console.log("sectionStart" + sectionStart + strReplaceAll.substring(sectionStart, sectionStart + 20));
       //if (sectionStart === undefined || sectionStart < 0) return src;
       let mainTagEnd = strReplaceAll.indexOf(" ", sectionStart)
@@ -368,6 +369,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       if (strReplaceAll.indexOf(sRepeator) !== iRepeator)
         iRepeator = strReplaceAll.indexOf(sRepeator);
       else iRepeator = -1;
+      sectionEnd = strReplaceAll.indexOf("</" + mainTag + ">", sectionStart);
+//      strReplaceAll = strReplaceAll.substring(0, sectionStart ) + '<template *ngIf=\'isDsLoaded\' >' + strReplaceAll.substring(sectionStart , sectionEnd + ("</" + mainTag + ">").length ) + '</template>' + strReplaceAll.substring(sectionEnd + ("</" + mainTag + ">").length);
       strReplaceAll = strReplaceAll.substring(0, sectionStart) + addNewSection + strReplaceAll.substring(sectionStart);
     }
     strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', "");
