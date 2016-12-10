@@ -2,7 +2,7 @@ import { Component, ComponentFactory, NgModule, Input, Injectable } from '@angul
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
+import { AngularFire, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2';
 
 export interface IHaveDynamicData {
     exdata: any;
@@ -66,6 +66,23 @@ export class DynamicTypeBuilder {
             UpdateNew(ds: string, rep: string, fieldList: string, v1:any, v2:any, v3:any, v4:any, v5:any) {
                 //console.log("UpdateNew:" + ds + rep + fieldList);
                 //console.log("XX This eval v1 v2 v3:" + eval("v1") + eval("v2") + eval("v3"));
+                // const o = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/-KY_rhsvmwqChNYimX1V");
+                // o.subscribe(res => {
+                //     console.log("OO:" + res.f1 + res.f2 + JSON.stringify(res) );
+                //     // res.map(item => {
+                //     //     console.log("OO2:" + item.f1 + item.f2);
+                //     // });
+                // }
+                // );
+                // const o2 = this.af.database.object("/forms/" + ds + "/data/chkFemale");
+                // o2.subscribe(res => {
+                //     console.log("OO2:" + res.value + JSON.stringify(res) );
+                //     // res.map(item => {
+                //     //     console.log("OO2:" + item.f1 + item.f2);
+                //     // });
+                // }
+                // );
+                //console.log(" OOO:" + JSON.stringify(o));
                 let pl = "";
                 if (ds !== undefined) {
                     var nl = fieldList.split(',');
