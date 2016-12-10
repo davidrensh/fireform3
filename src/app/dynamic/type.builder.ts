@@ -73,7 +73,7 @@ export class DynamicTypeBuilder {
                 , v31: any, v32: any, v33: any, v34: any, v35: any, v36: any, v37: any, v38: any, v39: any, v40: any) {
                 console.log("UpdateNew:" + ds + rep + fieldList);
                 console.log("XX This eval v1 v2 v3:" + eval("v1") + eval("v2") + eval("v3"));
-                const o = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/-KY_rhsvmwqChNYimX1V");
+                const o = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/-KYa4A9VXc5vV2WbGQti");
                 o.subscribe(res => {
                     console.log("OO:" + res.f1 + res.f2 + JSON.stringify(res) );
                     // res.map(item => {
