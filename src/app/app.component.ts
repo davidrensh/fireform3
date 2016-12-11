@@ -8,5 +8,5 @@ import { Component} from '@angular/core';//,Directive, ComponentMetadata, Input,
   styleUrls: ['app.component.css']
 })
 export class AppComponent {
- title = 'app works2222!';
+ title = 'Fire Form';
 }

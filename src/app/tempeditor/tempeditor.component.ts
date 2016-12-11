@@ -8,71 +8,55 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
   styleUrls: ['tempeditor.component.css']
 })
 export class TempeditorComponent implements OnInit {
-  //myckeditor: any;
   @ViewChild('ckeditor') ckeditor: any;
   fireforms: FirebaseListObservable<any[]>;
   content: any;
   formname: string;
-  //editor1: any;
-  //html: string;
   constructor(private _zone: NgZone, public af: AngularFire) {
-    // console.log("testtttt11111");
-    // this.content = `<p>My HTML22</p>`;
-    this.formname = "f01";
+    //this.formname = "f01";
     this.fireforms = this.af.database.list("/forms");
-    // this.fireforms.subscribe(r => {
-    //   if (r) r.map(rr => {
-    //     MemberHome.s_dealer = rr;
-    //   });
-    // });
     const queryObservable = af.database.list('/forms', {
       query: {
         limitToFirst: 1
       }
     }).subscribe(r => {
-      // console.log("from q list:" + JSON.stringify(r));
+      console.log("Load 00" + r[0].name);
       if (r) r.map(rr => {
-        this.selectForm(rr);
+        setTimeout(() => {
+         // const kv = rr;
+         // console.log("Load first INSIDE:" + rr.name);
+          this.selectForm(rr);
+        }, 1000);
+
       });
     });
 
   }
 
   selectForm(d: any) {
-    //console.log("from selectForm:" + JSON.stringify( d));
     this.formname = d.name;
-    console.log("from selectForm formname:" + d.name + this.formname);
-    let subs = this.af.database.object("/forms/" + this.formname).subscribe(res => {
-      if (res) {
-        this.content = res.contenthtml;
-        //console.log("Editor details 99");
-        //subs.unsubscribe();
-      }
-    }
-    );
-    subs.unsubscribe();
+    this.ckeditor.instance.setData(d.contenthtml);
+    //console.log("Load first" + this.formname + d.contenthtml);
+    //this.content = d.contenthtml;
+    // let subs = this.af.database.object("/forms/" + this.formname).subscribe(res => {
+    //   if (res) {
+    //     this.content = res.contenthtml;
+    //   }
+    // }
+    // );
+    // subs.unsubscribe();
   }
   ngOnInit() {
-    //    CKEditor..replace( targetId );
+
   }
   insertStuff() {
-    // console.log("this.ckeditor.instance");
-     console.log(this.ckeditor.instance);
     var s = 'Telephone:&nbsp;<input maxlength="100" name="txtOfficeTel" required="required" size="20" type="tel" />';
-    //this.ckeditor.instance.insertElement(s);
-
-   // var fragment = this.ckeditor.getSelection().getRanges()[0].extractContents()
-   // var container = this.ckeditor.dom.element.createFromHtml(s, this.ckeditor.instance.document)
-    //fragment.appendTo(container)
     this.ckeditor.instance.insertHtml(s)
   }
   saveForm() {
-    //let formname: string = "f01";
-    //if (this !== undefined && this.content !== undefined) {
-    console.log("html001=" + this.content);
     this.af.database.object("/forms/" + this.formname).update({
       name: this.formname,
-      contenthtml: this.content,
+      contenthtml: this.ckeditor.instance.getData(),
       updateddate: (new Date()).toISOString().substr(0, 10)
     });
     // }

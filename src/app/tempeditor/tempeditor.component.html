@@ -1,5 +1,5 @@
 <label *ngFor="let d of fireforms | async">
-    <input class="radio-inline" type="radio" name="formname" (click)="selectForm(d)" > {{d.name }}  &nbsp; &nbsp;
+    <input class="radio-inline" type="radio" name="formname" [(ngModel)]="formname" value="{{d.name }}" (click)="selectForm(d)" > {{d.name }}  &nbsp; &nbsp;
 </label>
 <input class="form-control" required [(ngModel)]="formname" placeholder="Fire Form Name">
 <button class="btn btn-primary-outline btn-sm" (click)="saveForm()">Save form</button>

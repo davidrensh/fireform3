@@ -1,4 +1,4 @@
-import { Component, ComponentFactory, NgModule,OnInit, Input, Injectable } from '@angular/core';
+import { Component, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
@@ -86,11 +86,11 @@ export class DynamicTypeBuilder {
                     let ds = n.substring(1, pos);
                     let rep = n.substring(pos + 1, n.length - 1);
                     let s = "/forms/" + ds + "/data/block/" + rep;
-                    let sname =  ds + "." + rep ;
+                    let sname = ds + "." + rep;
 
                     this.listobj[sname] = this.af.database.list(s);
                 }
-               
+
             }
             getlist(ds: string, rep: string): any {
                 return this.listobj[ds + '.' + rep];
@@ -145,7 +145,7 @@ export class DynamicTypeBuilder {
                         let n = nl[i];
                         let k = i + 1;
                         // let dataname = "'" + ds + "." + rep + "." + n + "'";
-                        pl = pl + n + ': v' + k  + ',';
+                        pl = pl + n + ': v' + k + ',';
                     }
                     eval('item.push({' + pl + '});');
                 }
