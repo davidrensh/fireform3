@@ -13,18 +13,14 @@ export class TempeditorComponent implements OnInit {
   content: any;
   formname: string;
   constructor(private _zone: NgZone, public af: AngularFire) {
-    //this.formname = "f01";
     this.fireforms = this.af.database.list("/forms");
     const queryObservable = af.database.list('/forms', {
       query: {
         limitToFirst: 1
       }
     }).subscribe(r => {
-      console.log("Load 00" + r[0].name);
       if (r) r.map(rr => {
         setTimeout(() => {
-         // const kv = rr;
-         // console.log("Load first INSIDE:" + rr.name);
           this.selectForm(rr);
         }, 1000);
 
@@ -36,16 +32,7 @@ export class TempeditorComponent implements OnInit {
   selectForm(d: any) {
     this.formname = d.name;
     this.ckeditor.instance.setData(d.contenthtml);
-    //console.log("Load first" + this.formname + d.contenthtml);
-    //this.content = d.contenthtml;
-    // let subs = this.af.database.object("/forms/" + this.formname).subscribe(res => {
-    //   if (res) {
-    //     this.content = res.contenthtml;
-    //   }
-    // }
-    // );
-    // subs.unsubscribe();
-  }
+   }
   ngOnInit() {
 
   }
@@ -59,6 +46,5 @@ export class TempeditorComponent implements OnInit {
       contenthtml: this.ckeditor.instance.getData(),
       updateddate: (new Date()).toISOString().substr(0, 10)
     });
-    // }
   }
 }
