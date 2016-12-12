@@ -14,7 +14,8 @@ import { LoaderComponent } from './loader/loader.component';
 import { ListComponent } from './list/list.component';
 import { ShowComponent } from './show/show.component';
 import { ApiComponent } from './api/api.component';
-import { routing,appRoutingProviders }  from './myrouting/myrouting.component';
+import { routing, appRoutingProviders } from './myrouting/myrouting.component';
+// import { RoleService } from './role.service';
 export const firebaseConfig = {
   apiKey: "AIzaSyDUKlFAFOci3eIKn84YGr4Z1A4fexfyfNg",
   authDomain: "formaas.firebaseapp.com",
@@ -24,7 +25,7 @@ export const firebaseConfig = {
 
 @NgModule({
   declarations: [
-    AppComponent,TempeditorComponent, LoaderComponent, ListComponent, ShowComponent, ApiComponent
+   AppComponent,TempeditorComponent, LoaderComponent, ListComponent, ShowComponent, ApiComponent
   ],
   imports: [routing,CKEditorModule,
     BrowserModule,

@@ -15,7 +15,7 @@ export class ListComponent implements OnInit {
     
   }
   setMessage(message: string) {
-    this.title = 'Changed title';
+    this.title = 'Fireform 3';
     this.html = `<div>{{title}}</div><ul><li class="text" *ngFor="let item of items | async">{{item.$value}}</li></ul>
     <button (click)="self.saveForm('dynamic component')">Save</button>
     `;

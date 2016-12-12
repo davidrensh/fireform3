@@ -7,7 +7,7 @@ import { IHaveDynamicData, DynamicTypeBuilder } from '../dynamic/type.builder';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
 import { ActivatedRoute } from '@angular/router';
-
+import { RoleService } from '../role.service';
 @Component({
   selector: 'app-show',
   template: `
@@ -45,7 +45,8 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
   static html: string;
   static formname: string = "f02";
-  constructor(protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
+  constructor(public rs: RoleService, protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
+    this.rs.role = 1;
   }
   ngOnInit() {
 

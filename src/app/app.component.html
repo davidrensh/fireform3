@@ -1,10 +1,10 @@
 <div>
     {{title}}</div>
 <nav>
-    <a routerLink="/list" routerLinkActive="active">List</a>
-    <a routerLink="/show" routerLinkActive="active">Show</a>
-    <a routerLink="/loader" routerLinkActive="active">Loader</a>
-    <a routerLink="/api" routerLinkActive="active">API</a>
-    <a routerLink="/editor" routerLinkActive="active">Editor</a>
+    <a *ngIf="rs.role !== 1" routerLink="/list" routerLinkActive="active">List</a>
+    <!--<a routerLink="/show" routerLinkActive="active">Show</a>-->
+    <a *ngIf="rs.role !== 1" routerLink="/loader" routerLinkActive="active">Loader</a>
+    <a *ngIf="rs.role !== 1" routerLink="/api" routerLinkActive="active">API</a>
+    <a *ngIf="rs.role !== 1" routerLink="/editor" routerLinkActive="active">Editor</a>
 </nav>
 <router-outlet></router-outlet>
