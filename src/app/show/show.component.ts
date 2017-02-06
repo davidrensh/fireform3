@@ -16,7 +16,10 @@ import { RoleService } from '../role.service';
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
   <button class="btn btn-primary-outline btn-sm" (click)="UpdateNew('','','')">UpdateNew</button>
   <button class="btn btn-primary-outline btn-sm" (click)="print()">Print as PDF</button>
-  <div #dynamicContentPlaceHolder></div>  <hr />
+  <div id="print-section">
+  <div #dynamicContentPlaceHolder></div>
+  </div>
+  
 </div>
 `,
 
@@ -132,7 +135,22 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     //console.log("exdata :" + JSON.stringify(this.data));
   }
   print() {
-
+    let printContents, popupWin;
+    printContents = document.getElementById('print-section').innerHTML;
+    popupWin = window.open('', '_blank', 'top=0,left=0,height=100%,width=auto');
+    popupWin.document.open();
+    popupWin.document.write(`
+      <html>
+        <head>
+          <title>Print tab</title>
+          <style>
+          //........Customized style.......
+          </style>
+        </head>
+    <body onload="window.print();window.close()">${printContents}</body>
+      </html>`
+    );
+    popupWin.document.close();
 
   }
   saveData() {
@@ -309,7 +327,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       } else if (repeator !== "") {
         ds = "data['" + repeator + "']";
         this.dstable["'" + datasource + "." + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
-       // this.data["'" + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
+        // this.data["'" + repeator + "'"] = this.af.database.list("/forms/" + ShowComponent.formname + "/data/block/" + repeator);
         //console.log("repeatorDataB:" + JSON.stringify(this.repeatorData[repeator]));
         //this.repeatorData[repeator] = null;
       }
@@ -347,7 +365,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         iRepeator = strReplaceAll.indexOf(sRepeator);
       else iRepeator = -1;
       sectionEnd = strReplaceAll.indexOf("</" + mainTag + ">", sectionStart);
-//      strReplaceAll = strReplaceAll.substring(0, sectionStart ) + '<template *ngIf=\'isDsLoaded\' >' + strReplaceAll.substring(sectionStart , sectionEnd + ("</" + mainTag + ">").length ) + '</template>' + strReplaceAll.substring(sectionEnd + ("</" + mainTag + ">").length);
+      //      strReplaceAll = strReplaceAll.substring(0, sectionStart ) + '<template *ngIf=\'isDsLoaded\' >' + strReplaceAll.substring(sectionStart , sectionEnd + ("</" + mainTag + ">").length ) + '</template>' + strReplaceAll.substring(sectionEnd + ("</" + mainTag + ">").length);
       strReplaceAll = strReplaceAll.substring(0, sectionStart) + addNewSection + strReplaceAll.substring(sectionStart);
     }
     strReplaceAll = strReplaceAll.replace(sRepeator + repeator + '"', "");
@@ -464,7 +482,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let component = this.componentRef.instance;
 
         component.data = this.data;
-       // console.log("Listobj:" + this.dstable);
+        // console.log("Listobj:" + this.dstable);
         //component.listobj = this.dstable;
         //component.InitialList(this.dstable);
       });
