@@ -14,15 +14,14 @@ import { RoleService } from '../role.service';
 <div>
   <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
   <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
-  <button class="btn btn-primary-outline btn-sm" (click)="UpdateNew('','','')">UpdateNew</button>
-  <button class="btn btn-primary-outline btn-sm" (click)="print()">Print as PDF</button>
-  <div id="print-section">
+  <button class="btn btn-primary-outline btn-sm" (click)="print()">Print (as PDF)</button>
+  <div id="print-section"><div class="printborder">
   <div #dynamicContentPlaceHolder></div>
-  </div>
+  </div></div>
   
 </div>
 `,
-
+styleUrls: ['show.component.css'],
   // data: <pre>{{data | json}}</pre>
   // exdata: <pre>{{exdata | json}}</pre>  
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
@@ -143,8 +142,10 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       <html>
         <head>
           <title>Print tab</title>
-          <style>
-          //........Customized style.......
+          <style type="text/css">
+            div.printborder {
+                border: 1px #000 solid;
+            }
           </style>
         </head>
     <body onload="window.print();window.close()">${printContents}</body>
@@ -417,25 +418,6 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     }
     return s;
   }
-
-  // UpdateNew(ds: string, rep: string, fieldList: string) {
-  //   console.log("UpdateNew:" + ds + rep + fieldList);
-  //   if (ds !== undefined) {
-  //     var nl = fieldList.split(',');
-  //     let d = (new Date()).toISOString().substr(0, 10);
-  //     const item = this.af.database.object("/forms/" + ds + "/data/block/" + rep + "/" + d);
-  //     let dataname ="'" + ds + "." + rep + "." + nl + "'";
-  //     for (var i = 0; i < nl.length; i++) {
-  //       let n = nl[i];
-  //       console.log("dataall:" + this.data[dataname]);
-
-  //       item.update({
-  //         n: (this.data[dataname] === undefined) ? " " : this.data[dataname]
-  //       });
-
-  //     }
-  //   }
-  // }
 
   GetAttributeValue(strReplaceAll: string, sectionStart: number, find: string): string {
     let start = strReplaceAll.indexOf(find, sectionStart) + find.length;

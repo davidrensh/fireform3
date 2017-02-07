@@ -1,4 +1,12 @@
-
-<ul>
-    <li class="text" *ngFor="let item of items | async">{{item.$value}}</li>
-</ul>
+<!--<ul>
+    <li class="text" *ngFor="let item of items | async">{{item.name}}</li>
+</ul>-->
+<div *ngFor="let item of items | async">
+    <a button color="primary" style="text-align: left" (click)="listData(item.name)">
+    &nbsp;&nbsp;{{item.name}}
+    </a>
+    <div *ngFor="let mm of subData| async">
+        <label>{{mm.varname}}  {{mm.value}}</label><br>
+    </div>
+    <br>
+</div>
