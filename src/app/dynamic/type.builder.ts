@@ -77,7 +77,7 @@ export class DynamicTypeBuilder {
         class CustomDynamicComponent implements IHaveDynamicData, OnInit {
             @ViewChild(SignaturePad) signaturePad: SignaturePad;
            //@ViewChild('SignaturePad', { read: ViewContainerRef })
-            //<signature-pad *ngIf="signaturePad" [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+            //<div id="sigpad" class="padClass"><signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad></div>
             //public signaturePad: SignaturePad;
             @Input() exdata: any;
             @Input() data: any;

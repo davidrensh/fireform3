@@ -19,6 +19,6 @@
     <button [style.color]="'green'" class="btn btn-primary-outline btn-sm" (click)="confirm=false;">No</button>
 </div>
 <button class="btn btn-primary-outline btn-sm" (click)="insertStuff()">Insert Stuff</button>
-<ckeditor [(ngModel)]="content" #ckeditor [config]="{extraAllowedContent : '*[*]' , height : 720, entities : false}" debounce="500">
+<ckeditor [(ngModel)]="content" #ckeditor [config]="{allowedContent: true, extraAllowedContent : '*[*]' , height : 720, entities : false}" debounce="500">
     <p>Hello <strong>world</strong></p>
 </ckeditor>
