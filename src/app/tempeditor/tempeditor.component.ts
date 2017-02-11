@@ -45,6 +45,7 @@ export class TempeditorComponent implements OnInit {
     this.needsignature = d.needsignature;
     this.needpassword = d.needpassword;
     this.ckeditor.instance.setData(d.contenthtml);
+
   }
   ngOnInit() {
 
@@ -60,6 +61,19 @@ export class TempeditorComponent implements OnInit {
     this.persontypename = persontypeName;
   }
   saveFormYes() {
+    let s = this.ckeditor.instance.getData();
+    if(s.indexOf('<style style="display: none" type="text/css">.padClass') < 0)
+          s = s + `<style style="display: none" type="text/css">.padClass {
+    position: relative;
+    font-size: 10px;
+    width: 300px;
+    height: 80px;
+    border: 1px solid #e8e8e8;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.08) inset;
+    border-radius: 4px;
+}
+</style>`;
     this.af.database.object("/forms/" + this.formname).update({
       name: this.formname,
       typename: this.typename,
@@ -67,7 +81,7 @@ export class TempeditorComponent implements OnInit {
       needpassword: this.needpassword,
       needsignature: this.needsignature,
       password: this.password,
-      contenthtml: this.ckeditor.instance.getData(),
+      contenthtml: s,
       updateddate: (new Date()).toISOString().substr(0, 10)
     });
   }

@@ -245,6 +245,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
 
     s = this.ConvertRepeator(s);
     console.log(s);
+
     return s;
   }
 
