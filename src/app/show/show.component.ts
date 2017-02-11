@@ -1,33 +1,52 @@
-import { Component, ComponentRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentRef, ViewChild,ContentChildren, ViewContainerRef } from '@angular/core';
 import { AfterViewInit, OnInit, OnDestroy } from '@angular/core';
 import { OnChanges, SimpleChange, ComponentFactory } from '@angular/core';
 import { COMPILER_PROVIDERS } from '@angular/compiler';
 
 import { IHaveDynamicData, DynamicTypeBuilder } from '../dynamic/type.builder';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-
+import { SignaturePad } from 'angular2-signaturepad/signature-pad';
+//import { FormBuilder, FormGroup, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { RoleService } from '../role.service';
+import { BrowserModule } from '@angular/platform-browser'
+
+
 @Component({
   selector: 'app-show',
   template: `
 <div>
-  <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
-  <button class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
-  <button class="btn btn-primary-outline btn-sm" (click)="print()">Print (as PDF)</button>
+  <input *ngIf="staticneedpassword()" class="form-control" [(ngModel)]="enteredPassword" placeholder="Form password">
+  <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Email' " class="form-control" [(ngModel)]="enteredEmail" placeholder="Email">
+  <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Phone' " class="form-control" [(ngModel)]="enteredPhone" placeholder="Phone">
+  <div *ngIf="validPassword()">
+    <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
+    <button *ngIf="!staticneedsignature()" class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
+    <div *ngIf="staticneedsignature()">
+     
+      <button *ngIf="signed" class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
+    </div>
+    <button class="btn btn-primary-outline btn-sm" (click)="print()">Print (as PDF)</button>
+  </div>
   <div id="print-section"><div class="printborder">
   <div #dynamicContentPlaceHolder></div>
   </div></div>
   
 </div>
 `,
-styleUrls: ['show.component.css'],
-  // data: <pre>{{data | json}}</pre>
-  // exdata: <pre>{{exdata | json}}</pre>  
+  styleUrls: ['show.component.css'],
+//      <signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
 })
+
 export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
   @ViewChild('dynamicContentPlaceHolder', { read: ViewContainerRef })
+  //@ViewChild('SignaturePad', { read: ViewContainerRef })
+  //@ContentChildren('SignaturePad')
+ // signaturePad: SignaturePad;
+  //private form2: FormGroup;
+
   protected dynamicComponentTarget: ViewContainerRef;
   protected componentRef: ComponentRef<IHaveDynamicData>;
   private sub: any;
@@ -44,21 +63,64 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   public dstable = {};
   public datanewrow = {};
   public repeatorData = [];
-
+  enteredPassword: string;
+  enteredEmail: string;
+  enteredPhone: string;
+  signed: boolean;
   static html: string;
   static formname: string = "f02";
+  static typename: string;
+  static persontypename: string;
+  static needpassword: boolean;
+  static needsignature: boolean;
+  static password: string;
+
   constructor(public rs: RoleService, protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
     this.rs.role = 1;
+    // this.form = fb.group({
+    //   signatureField: '',
+    // });
+  }
+  statictypename() {
+    return ShowComponent.typename;
+  }
+  staticpersontypename() {
+    //console.log("ShowComponent.persontypename:" + ShowComponent.persontypename);
+    return ShowComponent.persontypename;
+  }
+  staticneedpassword() {
+    return ShowComponent.needpassword;
+  }
+  staticneedsignature() {
+    return ShowComponent.needsignature;
+  }
+  staticpassword() {
+    return ShowComponent.password;
+  }
+  validPassword() {
+    if (!this.staticneedpassword()) return true;
+    //console.log("ShowComponent.password === this.enteredPassword:" + ShowComponent.password + " ===" + this.enteredPassword);
+    return ShowComponent.password === this.enteredPassword;
   }
   ngOnInit() {
-
+    //this.signaturePad.clear();
+    this.signed = false;
+    //this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
+    //this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+    this.enteredPassword = "";
     this.sub = this.route.params.subscribe(params => {
       ShowComponent.formname = params['id'];
       this.ssHtml = this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
         if (res && res.contenthtml) {
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
+          ShowComponent.typename = res.typename;
+          ShowComponent.persontypename = res.persontypename;
+          ShowComponent.password = res.password;
+          ShowComponent.needpassword = res.needpassword;
+          ShowComponent.needsignature = res.needsignature;
+          //console.log("res.persontypename:" + res.persontypename);
           ShowComponent.html = convertedHtml;
-          // console.log(ShowComponent.html);
+
 
           // setTimeout(() => {
 
@@ -90,6 +152,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     });
 
   }
+
   loadExdata(s: string) {
     let match = -1;
     let matchEnd = -1;

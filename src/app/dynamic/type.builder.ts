@@ -1,9 +1,11 @@
-import { Component, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
+import { Component, ViewChild,ElementRef, ViewContainerRef, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
 import { AngularFire, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2';
-
+import { SignaturePad } from 'angular2-signaturepad/signature-pad';
+import { SignaturePadModule } from 'angular2-signaturepad';
+import { BrowserModule } from '@angular/platform-browser'
 export interface IHaveDynamicData {
     exdata: any;
     data: any;
@@ -61,24 +63,48 @@ export class DynamicTypeBuilder {
         @Component({
             selector: 'dynamic-component',
             template: tmpl,
+            styles:[`.padClass {
+    position: relative;
+    font-size: 10px;
+    width: 300px;
+    height: 80px;
+    border: 1px solid #e8e8e8;
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.08) inset;
+    border-radius: 4px;
+}`]
         })
         class CustomDynamicComponent implements IHaveDynamicData, OnInit {
+            @ViewChild(SignaturePad) signaturePad: SignaturePad;
+           //@ViewChild('SignaturePad', { read: ViewContainerRef })
+            //<signature-pad *ngIf="signaturePad" [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+            //public signaturePad: SignaturePad;
             @Input() exdata: any;
             @Input() data: any;
             @Input() datanewrow: any;
+
             //@Input() listobj: any;
             public listobj = {};
             public rowediting = {};
             public rowdata = {};
             public isDsLoaded = false;
-            constructor(public af: AngularFire) {
+
+
+            constructor(public af: AngularFire,public elementRef:ElementRef) {
                 //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
                 //this.InitialList(dtable);
             }
             ngOnInit() {
                 //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
                 this.InitialList(dtable);
+                //this.signaturePad = new SignaturePad(this.elementRef);
             }
+            ngAfterViewInit() {
+                // this.signaturePad is now available
+                // this.signaturePad.set('minWidth', 0.1); // set szimek/signature_pad options at runtime
+                // this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+            }
+
             public InitialList(dstable: any) {
                 for (var item in dstable) {
                     let n: string = item;
@@ -91,6 +117,24 @@ export class DynamicTypeBuilder {
                     this.listobj[sname] = this.af.database.list(s);
                 }
 
+            }
+            private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
+                'minWidth': 0.1,
+                'canvasWidth': 300,
+                'canvasHeight': 80
+            };
+            drawComplete() {
+                console.log("this.signaturePad" + this.signaturePad);
+                 console.log("SignaturePad" + SignaturePad );
+                
+                // will be notified of szimek/signature_pad's onEnd event
+                if(this.signaturePad !== undefined)
+                    console.log(this.signaturePad.toDataURL());
+            }
+
+            drawStart() {
+                // will be notified of szimek/signature_pad's onBegin event
+                console.log('begin drawing');
             }
             getlist(ds: string, rep: string): any {
                 return this.listobj[ds + '.' + rep];
@@ -156,7 +200,7 @@ export class DynamicTypeBuilder {
     }
     protected createComponentModule(componentType: any) {
         @NgModule({
-            imports: [
+            imports: [SignaturePadModule,
                 PartsModule, // there are 'text-editor', 'string-editor'...
             ],
             declarations: [

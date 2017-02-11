@@ -15,6 +15,7 @@ import { ListComponent } from './list/list.component';
 import { ShowComponent } from './show/show.component';
 import { ApiComponent } from './api/api.component';
 import { routing, appRoutingProviders } from './myrouting/myrouting.component';
+import { SignaturePadModule } from 'angular2-signaturepad';
 // import { RoleService } from './role.service';
 export const firebaseConfig = {
   apiKey: "AIzaSyDUKlFAFOci3eIKn84YGr4Z1A4fexfyfNg",
@@ -27,7 +28,7 @@ export const firebaseConfig = {
   declarations: [
    AppComponent,TempeditorComponent, LoaderComponent, ListComponent, ShowComponent, ApiComponent
   ],
-  imports: [routing,CKEditorModule,
+  imports: [SignaturePadModule ,routing,CKEditorModule,
     BrowserModule,
     CommonModule,
     FormsModule, AngularFireModule.initializeApp(firebaseConfig)

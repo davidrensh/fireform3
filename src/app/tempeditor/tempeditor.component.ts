@@ -12,7 +12,14 @@ export class TempeditorComponent implements OnInit {
   fireforms: FirebaseListObservable<any[]>;
   content: any;
   formname: string;
+  typename: string;
+  persontypename: string;
+  needpassword: boolean;
+  needsignature: boolean;
+  password: string;
+  confirm: boolean;
   constructor(private _zone: NgZone, public af: AngularFire) {
+    this.confirm = false;
     this.fireforms = this.af.database.list("/forms");
     const queryObservable = af.database.list('/forms', {
       query: {
@@ -31,8 +38,14 @@ export class TempeditorComponent implements OnInit {
 
   selectForm(d: any) {
     this.formname = d.name;
+    this.typename = d.typename;
+
+    this.persontypename = d.persontypename;
+    this.password = d.password;
+    this.needsignature = d.needsignature;
+    this.needpassword = d.needpassword;
     this.ckeditor.instance.setData(d.contenthtml);
-   }
+  }
   ngOnInit() {
 
   }
@@ -40,11 +53,30 @@ export class TempeditorComponent implements OnInit {
     var s = 'Telephone:&nbsp;<input maxlength="100" name="txtOfficeTel" required="required" size="20" type="tel" />';
     this.ckeditor.instance.insertHtml(s)
   }
-  saveForm() {
+  setFormType(typeName: string) {
+    this.typename = typeName;
+  }
+  setpersontype(persontypeName: string) {
+    this.persontypename = persontypeName;
+  }
+  saveFormYes() {
     this.af.database.object("/forms/" + this.formname).update({
       name: this.formname,
+      typename: this.typename,
+      persontypename: this.persontypename,
+      needpassword: this.needpassword,
+      needsignature: this.needsignature,
+      password: this.password,
       contenthtml: this.ckeditor.instance.getData(),
       updateddate: (new Date()).toISOString().substr(0, 10)
     });
+  }
+  saveForm() {
+    let s:string = this.ckeditor.instance.getData();
+    if (s.length > 0) {
+      this.confirm = false;
+      this.saveFormYes();
+    }
+    else this.confirm = true;
   }
 }

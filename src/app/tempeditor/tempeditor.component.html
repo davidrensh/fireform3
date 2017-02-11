@@ -1,9 +1,23 @@
 <label *ngFor="let d of fireforms | async">
     <input class="radio-inline" type="radio" name="formname" [(ngModel)]="formname" value="{{d.name }}" (click)="selectForm(d)" > {{d.name }}  &nbsp; &nbsp;
 </label>
-<input class="form-control" required [(ngModel)]="formname" placeholder="Fire Form Name">
+<input class="form-control" required [(ngModel)]="formname" placeholder="Form Name">
+<br>
+<input class="radio-inline" type="radio" name="formtype" [(ngModel)]="typename" value="Journal" (click)="setFormType('Journal')">Journal
+<input class="radio-inline" type="radio" name="formtype" [(ngModel)]="typename" value="PerPerson" (click)="setFormType('PerPerson')">Per Person
+<label *ngIf="typename === 'PerPerson'">
+    <input class="radio-inline" type="radio" name="formpersontype" [(ngModel)]="persontypename" value="Email" (click)="setpersontype('Email')">Identify by Email
+    <input class="radio-inline" type="radio" name="formpersontype" [(ngModel)]="persontypename" value="Phone" (click)="setpersontype('Phone')">Identify by Phone
+</label>
+<input type="checkbox" [(ngModel)]="needpassword">Password Protection?
+<input *ngIf="needpassword" class="form-control" [(ngModel)]="password" placeholder="Form password">
+<input type="checkbox" [(ngModel)]="needsignature">Need signature?
 <button class="btn btn-primary-outline btn-sm" (click)="saveForm()">Save form</button>
-
+<div *ngIf="confirm">
+    <label [style.color]="'red'"> Are you sure to save empty template?</label>
+    <button [style.color]="'red'" class="btn btn-primary-outline btn-sm" (click)="saveFormYes()">Yes</button>
+    <button [style.color]="'green'" class="btn btn-primary-outline btn-sm" (click)="confirm=false;">No</button>
+</div>
 <button class="btn btn-primary-outline btn-sm" (click)="insertStuff()">Insert Stuff</button>
 <ckeditor [(ngModel)]="content" #ckeditor [config]="{extraAllowedContent : '*[*]' , height : 720, entities : false}" debounce="500">
     <p>Hello <strong>world</strong></p>
