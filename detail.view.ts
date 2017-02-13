@@ -32,6 +32,7 @@ export class DynamicDetail implements AfterViewInit, OnChanges, OnDestroy, OnIni
     protected data = {};// { namea: "ABC123",nameb: "A description of this Entity" };
     protected exdata = {};
     protected datanewrow = {};
+    protected signed: boolean = false;
     // wee need Dynamic component builder
     constructor(
         protected typeBuilder: DynamicTypeBuilder,
@@ -73,6 +74,7 @@ console.log("exdata=" + JSON.stringify(this.exdata));
                 component.data = this.data;
                 component.datanewrow = this.datanewrow;
                 component.exdata = this.exdata;
+                component.signed = this.signed;
                 //...
             });
     }

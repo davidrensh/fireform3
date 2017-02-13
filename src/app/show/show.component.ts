@@ -1,4 +1,4 @@
-import { Component, ComponentRef, ViewChild,ContentChildren, ViewContainerRef } from '@angular/core';
+import { Component, ComponentRef, ViewChild, ContentChildren, ViewContainerRef } from '@angular/core';
 import { AfterViewInit, OnInit, OnDestroy } from '@angular/core';
 import { OnChanges, SimpleChange, ComponentFactory } from '@angular/core';
 import { COMPILER_PROVIDERS } from '@angular/compiler';
@@ -16,26 +16,14 @@ import { BrowserModule } from '@angular/platform-browser'
   selector: 'app-show',
   template: `
 <div>
-  <input *ngIf="staticneedpassword()" class="form-control" [(ngModel)]="enteredPassword" placeholder="Form password">
-  <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Email' " class="form-control" [(ngModel)]="enteredEmail" placeholder="Email">
-  <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Phone' " class="form-control" [(ngModel)]="enteredPhone" placeholder="Phone">
-  <div *ngIf="validPassword()">
-    <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
-    <button *ngIf="!staticneedsignature()" class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
-    <div *ngIf="staticneedsignature()">
-     
-      <button *ngIf="signed" class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
-    </div>
-    <button class="btn btn-primary-outline btn-sm" (click)="print()">Print (as PDF)</button>
-  </div>
-  <div id="print-section"><div class="printborder">
-  <div #dynamicContentPlaceHolder></div>
-  </div></div>
+
+    <div  #dynamicContentPlaceHolder></div>
+
   
 </div>
 `,
   styleUrls: ['show.component.css'],
-//      <signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
+  //      <signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad>
 
   providers: [DynamicTypeBuilder, COMPILER_PROVIDERS]
 })
@@ -44,7 +32,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   @ViewChild('dynamicContentPlaceHolder', { read: ViewContainerRef })
   //@ViewChild('SignaturePad', { read: ViewContainerRef })
   //@ContentChildren('SignaturePad')
- // signaturePad: SignaturePad;
+  // signaturePad: SignaturePad;
   //private form2: FormGroup;
 
   protected dynamicComponentTarget: ViewContainerRef;
@@ -55,7 +43,9 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   ssVar: any;
   // example entity ... to be recieved from other app parts
   // this is kind of candiate for @Input
+  public signed: boolean = false;
   public data = {};
+  public attrdata = {};
   public rowedit = {};
   public roweditvalue = {};
   static namelist: string[] = [];
@@ -63,17 +53,11 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
   public dstable = {};
   public datanewrow = {};
   public repeatorData = [];
-  enteredPassword: string;
-  enteredEmail: string;
-  enteredPhone: string;
-  signed: boolean;
+
+  //signed: boolean;
   static html: string;
   static formname: string = "f02";
-  static typename: string;
-  static persontypename: string;
-  static needpassword: boolean;
-  static needsignature: boolean;
-  static password: string;
+
 
   constructor(public rs: RoleService, protected typeBuilder: DynamicTypeBuilder, public af: AngularFire, private route: ActivatedRoute) {
     this.rs.role = 1;
@@ -81,43 +65,25 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     //   signatureField: '',
     // });
   }
-  statictypename() {
-    return ShowComponent.typename;
-  }
-  staticpersontypename() {
-    //console.log("ShowComponent.persontypename:" + ShowComponent.persontypename);
-    return ShowComponent.persontypename;
-  }
-  staticneedpassword() {
-    return ShowComponent.needpassword;
-  }
-  staticneedsignature() {
-    return ShowComponent.needsignature;
-  }
-  staticpassword() {
-    return ShowComponent.password;
-  }
-  validPassword() {
-    if (!this.staticneedpassword()) return true;
-    //console.log("ShowComponent.password === this.enteredPassword:" + ShowComponent.password + " ===" + this.enteredPassword);
-    return ShowComponent.password === this.enteredPassword;
-  }
+
   ngOnInit() {
     //this.signaturePad.clear();
     this.signed = false;
     //this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
     //this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
-    this.enteredPassword = "";
+    // this.enteredPassword = "";
     this.sub = this.route.params.subscribe(params => {
       ShowComponent.formname = params['id'];
       this.ssHtml = this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
         if (res && res.contenthtml) {
+          this.attrdata["typename"]       = res.typename;
+          this.attrdata["persontypename"] = res.persontypename;
+          this.attrdata["password"]       = res.password;
+          this.attrdata["needpassword"]   = res.needpassword;
+          this.attrdata["needsignature"]  = res.needsignature;          
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
-          ShowComponent.typename = res.typename;
-          ShowComponent.persontypename = res.persontypename;
-          ShowComponent.password = res.password;
-          ShowComponent.needpassword = res.needpassword;
-          ShowComponent.needsignature = res.needsignature;
+
+          
           //console.log("res.persontypename:" + res.persontypename);
           ShowComponent.html = convertedHtml;
 
@@ -196,27 +162,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     }
     //console.log("exdata :" + JSON.stringify(this.data));
   }
-  print() {
-    let printContents, popupWin;
-    printContents = document.getElementById('print-section').innerHTML;
-    popupWin = window.open('', '_blank', 'top=0,left=0,height=100%,width=auto');
-    popupWin.document.open();
-    popupWin.document.write(`
-      <html>
-        <head>
-          <title>Print tab</title>
-          <style type="text/css">
-            div.printborder {
-                border: 1px #000 solid;
-            }
-          </style>
-        </head>
-    <body onload="window.print();window.close()">${printContents}</body>
-      </html>`
-    );
-    popupWin.document.close();
 
-  }
   saveData() {
     //let formname: string = "f01";
     if (ShowComponent.namelist !== undefined) {
@@ -507,6 +453,23 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var p2 = this.ReplaceWithParam(src, "input", "radio");
     return p2;
   }
+  wrapTemplate(t: string):string {
+    let s = `  <input *ngIf="staticneedpassword()" class="form-control" [(ngModel)]="enteredPassword" placeholder="Form password">
+  <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Email' " class="form-control" [(ngModel)]="enteredEmail" placeholder="Email">
+  <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Phone' " class="form-control" [(ngModel)]="enteredPhone" placeholder="Phone">
+  <div *ngIf="validPassword()">
+    <button class="btn btn-primary-outline btn-sm" (click)="refreshContent()">Refresh</button>
+    <button *ngIf="!staticneedsignature()" class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
+    <div *ngIf="staticneedsignature()">
+     
+      <button *ngIf="signed" class="btn btn-primary-outline btn-sm" (click)="saveData()">Save Data</button>
+    </div>
+    <button class="btn btn-primary-outline btn-sm" (click)="print()">Print (as PDF)</button>
+<div  id="print-section"><div class="printborder">` + t + `
+  </div>
+      </div></div>`;
+    return s;
+  }
   protected refreshContent() {
 
     if (this.componentRef) {
@@ -514,10 +477,10 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     }
 
     if (ShowComponent.html == undefined) return;
-    var template = ShowComponent.html;
+    var template =this.wrapTemplate(ShowComponent.html);
 
     this.typeBuilder
-      .createComponentFactory(template, this.dstable)
+      .createComponentFactory(template, this.dstable, this.attrdata)
       .then((factory: ComponentFactory<IHaveDynamicData>) => {
         // Target will instantiate and inject component (we'll keep reference to it)
         this.componentRef = this
@@ -528,6 +491,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
         let component = this.componentRef.instance;
 
         component.data = this.data;
+        component.signed = this.signed;
         // console.log("Listobj:" + this.dstable);
         //component.listobj = this.dstable;
         //component.InitialList(this.dstable);

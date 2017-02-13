@@ -1,4 +1,4 @@
-import { Component, ViewChild,ElementRef, ViewContainerRef, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
+import { Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
@@ -10,6 +10,7 @@ export interface IHaveDynamicData {
     exdata: any;
     data: any;
     datanewrow: any;
+    signed: boolean;
     //listobj: any;
     InitialList(dstable: any): void;
     // UpdateNew(ds: string, rep: string, fieldList: string, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any, v7: any, v8: any, v9: any, v10: any
@@ -29,7 +30,7 @@ export class DynamicTypeBuilder {
     // this object is singleton - so we can use this as a cache
     private _cacheOfFactories: { [templateKey: string]: ComponentFactory<IHaveDynamicData> } = {};
 
-    public createComponentFactory(template: string, mydata: any)
+    public createComponentFactory(template: string, mydata: any, attrdata: any)
         : Promise<ComponentFactory<IHaveDynamicData>> {
 
         let factory = this._cacheOfFactories[template];
@@ -43,7 +44,7 @@ export class DynamicTypeBuilder {
         }
 
         // unknown template ... let's create a Type for it
-        let type = this.createNewComponent(template, mydata);
+        let type = this.createNewComponent(template, mydata, attrdata);
         let module = this.createComponentModule(type);
 
         return new Promise((resolve) => {
@@ -59,11 +60,11 @@ export class DynamicTypeBuilder {
         });
     }
 
-    protected createNewComponent(tmpl: string, dtable: any) {
+    protected createNewComponent(tmpl: string, dtable: any, attrdata: any) {
         @Component({
             selector: 'dynamic-component',
             template: tmpl,
-            styles:[`.padClass {
+            styles: [`.padClass {
     position: relative;
     font-size: 10px;
     width: 300px;
@@ -72,11 +73,16 @@ export class DynamicTypeBuilder {
     background-color: #fff;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.08) inset;
     border-radius: 4px;
-}`]
+}
+
+div.printborder {
+    border: 1px #000 solid;
+}
+`]
         })
         class CustomDynamicComponent implements IHaveDynamicData, OnInit {
             @ViewChild(SignaturePad) signaturePad: SignaturePad;
-           //@ViewChild('SignaturePad', { read: ViewContainerRef })
+            //@ViewChild('SignaturePad', { read: ViewContainerRef })
             //<div id="sigpad" class="padClass"><signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad></div>
             //public signaturePad: SignaturePad;
             @Input() exdata: any;
@@ -88,15 +94,78 @@ export class DynamicTypeBuilder {
             public rowediting = {};
             public rowdata = {};
             public isDsLoaded = false;
+            public signed: boolean = false;
+            public typename: string;
+            public persontypename: string;
+            public needpassword: boolean;
+            public needsignature: boolean;
+            public password: string;
+            enteredPassword: string;
+            enteredEmail: string;
+            enteredPhone: string;
 
+            statictypename() {
+                return this.typename;
+            }
+            staticpersontypename() {
+                //console.log("this.persontypename:" + this.persontypename);
+                return this.persontypename;
+            }
+            staticneedpassword() {
+                return this.needpassword;
+            }
+            staticneedsignature() {
+                return this.needsignature;
+            }
+            staticpassword() {
+                return this.password;
+            }
+            validPassword(): boolean {
+                let b = this.validPassword2();
+                //console.log("validPassword:" + b);
+                return b;
+            }
+            validPassword2(): boolean {
+                if (!this.staticneedpassword()) return true;
+                if (this.enteredPassword === undefined) return false;
+                //console.log("this.password === this.enteredPassword:" + this.password + " ===" + this.enteredPassword);
+                return this.password === this.enteredPassword;
+            }
+            print() {
+                let printContents, popupWin;
+                printContents = document.getElementById('print-section').innerHTML;
+                popupWin = window.open('', '_blank', 'top=0,left=0,height=100%,width=auto');
+                popupWin.document.open();
+                popupWin.document.write(`
+      <html>
+        <head>
+          <title>Print tab</title>
+          <style type="text/css">
+            div.printborder {
+                border: 1px #000 solid;
+            }
+          </style>
+        </head>
+    <body onload="window.print();window.close()">${printContents}</body>
+      </html>`
+                );
+                popupWin.document.close();
 
-            constructor(public af: AngularFire,public elementRef:ElementRef) {
+            }
+            constructor(public af: AngularFire, public elementRef: ElementRef) {
                 //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
                 //this.InitialList(dtable);
             }
             ngOnInit() {
                 //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
                 this.InitialList(dtable);
+                this.signed = false;
+                this.typename =       attrdata["typename"];
+                this.persontypename = attrdata["persontypename"];
+                this.password =       attrdata["password"];
+                this.needpassword =   attrdata["needpassword"];
+                this.needsignature =  attrdata["needsignature"];
+                //console.log("Data needpassword XXXXXX:" + JSON.stringify(attrdata) + attrdata["needpassword"]);
                 //this.signaturePad = new SignaturePad(this.elementRef);
             }
             ngAfterViewInit() {
@@ -124,12 +193,14 @@ export class DynamicTypeBuilder {
                 'canvasHeight': 80
             };
             drawComplete() {
-                console.log("this.signaturePad" + this.signaturePad);
-                 console.log("SignaturePad" + SignaturePad );
-                
+                // console.log("this.signaturePad" + this.signaturePad);
+                //  console.log("SignaturePad" + SignaturePad );
+
                 // will be notified of szimek/signature_pad's onEnd event
-                if(this.signaturePad !== undefined)
+                if (this.signaturePad !== undefined) {
                     console.log(this.signaturePad.toDataURL());
+                    this.signed = true;
+                }
             }
 
             drawStart() {
