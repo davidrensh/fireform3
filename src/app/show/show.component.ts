@@ -76,14 +76,14 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       ShowComponent.formname = params['id'];
       this.ssHtml = this.af.database.object("/forms/" + ShowComponent.formname).subscribe(res => {
         if (res && res.contenthtml) {
-          this.attrdata["typename"]       = res.typename;
+          this.attrdata["typename"] = res.typename;
           this.attrdata["persontypename"] = res.persontypename;
-          this.attrdata["password"]       = res.password;
-          this.attrdata["needpassword"]   = res.needpassword;
-          this.attrdata["needsignature"]  = res.needsignature;          
+          this.attrdata["password"] = res.password;
+          this.attrdata["needpassword"] = res.needpassword;
+          this.attrdata["needsignature"] = res.needsignature;
           let convertedHtml: string = this.ConvertToNg2Template(res.contenthtml);
 
-          
+
           //console.log("res.persontypename:" + res.persontypename);
           ShowComponent.html = convertedHtml;
 
@@ -187,10 +187,11 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     s = this.ConvertCheckBox(s);
     s = this.ConvertRadio(s);
     s = this.ConvertDropdown(s);
+    s = this.ConvertSignature(s);
     //s = this.ConvertTable(s);
 
     s = this.ConvertRepeator(s);
-    console.log(s);
+    console.log("XXX converted" + s);
 
     return s;
   }
@@ -262,7 +263,29 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var p2 = this.ReplaceWithParam(src, "input", "checkbox");
     return p2;
   }
+  ConvertSignature(src: string): string {
+    //    let s = `<div id="` + name + `" class="padClass"><signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad></div>`;
+    let sr = "(<\\s*div\\s*)([^>]*)(\\s*name=\")(\\w*)(\".*)";
+    var re = new RegExp(sr, "g");
 
+    let t = ` id="party1" `;
+    let find = "party1";
+    var re2 = new RegExp(find, 'g');
+    // console.log(" reg:" + re);
+
+    // console.log("Tag only reg:" + re);
+    var p = src.replace(re, function (match, a, b, c, d, e) {
+      //console.log("Tag only name push :" + d);
+      //if (ShowComponent.namelist.indexOf(d) < 0) ShowComponent.namelist.push(d);
+
+      let k = t.replace(re2,  d );
+      console.log("k=" + k);
+     // k = "";
+      //console.log("tag only a:" + a + " b:" + b + " c:" + c + " d:" + d + e);
+      return `<div id="` + d + `" class="padClass"><signature-pad ` + k + ` [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad></div>`;
+    });
+    return p;
+  }
   ConvertDropdown(src: string): string {
 
     var p2 = this.ReplaceWithParam(src, "select", "");
@@ -305,7 +328,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       if (sectionEnd < 0) return src;
 
       let sMainTagSection = strReplaceAll.substring(sectionStart, sectionEnd + ("</" + mainTag + ">").length);
-      console.log("sMainTagSection:" + sMainTagSection);
+      //console.log("sMainTagSection:" + sMainTagSection);
 
       crud = this.GetAttributeValue(strReplaceAll, sectionStart, sCrud);
       datasource = this.GetAttributeValue(strReplaceAll, sectionStart, sDatasource);
@@ -453,7 +476,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     var p2 = this.ReplaceWithParam(src, "input", "radio");
     return p2;
   }
-  wrapTemplate(t: string):string {
+  wrapTemplate(t: string): string {
     let s = `  <input *ngIf="staticneedpassword()" class="form-control" [(ngModel)]="enteredPassword" placeholder="Form password">
   <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Email' " class="form-control" [(ngModel)]="enteredEmail" placeholder="Email">
   <input *ngIf="statictypename() === 'PerPerson' && staticpersontypename() === 'Phone' " class="form-control" [(ngModel)]="enteredPhone" placeholder="Phone">
@@ -477,7 +500,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
     }
 
     if (ShowComponent.html == undefined) return;
-    var template =this.wrapTemplate(ShowComponent.html);
+    var template = this.wrapTemplate(ShowComponent.html);
 
     this.typeBuilder
       .createComponentFactory(template, this.dstable, this.attrdata)

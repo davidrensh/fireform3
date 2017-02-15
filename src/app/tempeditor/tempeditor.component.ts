@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, NgZone, Input } from '@angular/core';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-//import { CKEditorModule } from 'ng2-ckeditor'
+//import { CKEditorComponent } from 'ng2-ckeditor'
 
 @Component({
   selector: 'app-tempeditor',
@@ -18,6 +18,8 @@ export class TempeditorComponent implements OnInit {
   needsignature: boolean;
   password: string;
   confirm: boolean;
+  signow: boolean = false;
+  sigName: string = "";
   constructor(private _zone: NgZone, public af: AngularFire) {
     this.confirm = false;
     this.fireforms = this.af.database.list("/forms");
@@ -45,14 +47,32 @@ export class TempeditorComponent implements OnInit {
     this.needsignature = d.needsignature;
     this.needpassword = d.needpassword;
     this.ckeditor.instance.setData(d.contenthtml);
-
+    console.log("XXXXXXXXXX Load");
   }
   ngOnInit() {
 
   }
   insertStuff() {
     var s = 'Telephone:&nbsp;<input maxlength="100" name="txtOfficeTel" required="required" size="20" type="tel" />';
-    this.ckeditor.instance.insertHtml(s)
+    this.ckeditor.instance.insertHtml(s);
+
+  }
+  insertSignature(name: string) {
+    let s = `<div signature="" name="` + name + `" class="padClass" />`;
+    // console.log("TO BE INSERT:" + s);
+    // // let v = this.ckeditor.instance.txtContent;
+    // // v.insertHtml(s);
+    //CKEditorComponent..instances
+    this.ckeditor.instance.insertHtml(s);
+    //this.ckeditor.instance.insertText(s);
+    // // this.ckeditor.instance.updateElement();
+    // let r = this.ckeditor.instance.getData();
+    // console.log("Insert res=" + r);
+
+    // var fragment = this.ckeditor.instance.getSelection().getRanges()[0].extractContents()
+    // var container = this.ckeditor.instance.dom.element.createFromHtml(s, this.ckeditor.instance.document)
+    // fragment.appendTo(container)
+    // this.ckeditor.instance.insertElement(container)
   }
   setFormType(typeName: string) {
     this.typename = typeName;
@@ -62,8 +82,8 @@ export class TempeditorComponent implements OnInit {
   }
   saveFormYes() {
     let s = this.ckeditor.instance.getData();
-    if(s.indexOf('<style style="display: none" type="text/css">.padClass') < 0)
-          s = s + `<style style="display: none" type="text/css">.padClass {
+    if (s.indexOf('<style style="display: none" type="text/css">.padClass') < 0)
+      s = s + `<style style="display: none" type="text/css">.padClass {
     position: relative;
     font-size: 10px;
     width: 300px;
@@ -86,7 +106,7 @@ export class TempeditorComponent implements OnInit {
     });
   }
   saveForm() {
-    let s:string = this.ckeditor.instance.getData();
+    let s: string = this.ckeditor.instance.getData();
     if (s.length > 0) {
       this.confirm = false;
       this.saveFormYes();

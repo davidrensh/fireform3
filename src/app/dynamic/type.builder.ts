@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, ViewContainerRef, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
+import { Component, ViewChild, ViewChildren, ElementRef, ViewContainerRef, ComponentFactory, NgModule, OnInit, Input, Injectable } from '@angular/core';
 import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
@@ -81,7 +81,10 @@ div.printborder {
 `]
         })
         class CustomDynamicComponent implements IHaveDynamicData, OnInit {
-            @ViewChild(SignaturePad) signaturePad: SignaturePad;
+            @ViewChildren(SignaturePad) spa: SignaturePad[];
+            // sp1: SignaturePad;
+            // sp2: SignaturePad;
+            // sp = {};
             //@ViewChild('SignaturePad', { read: ViewContainerRef })
             //<div id="sigpad" class="padClass"><signature-pad [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad></div>
             //public signaturePad: SignaturePad;
@@ -157,14 +160,17 @@ div.printborder {
                 //this.InitialList(dtable);
             }
             ngOnInit() {
+                //this.elementRef.
+                //this.sp2 = new SignaturePad(document.getElementById('ss'));
                 //this.listobj['f03.t1'] = this.af.database.list("/forms/f03/data/block/t1");
                 this.InitialList(dtable);
                 this.signed = false;
-                this.typename =       attrdata["typename"];
+                this.typename = attrdata["typename"];
                 this.persontypename = attrdata["persontypename"];
-                this.password =       attrdata["password"];
-                this.needpassword =   attrdata["needpassword"];
-                this.needsignature =  attrdata["needsignature"];
+                this.password = attrdata["password"];
+                this.needpassword = attrdata["needpassword"];
+                this.needsignature = attrdata["needsignature"];
+                console.log("data=" + JSON.stringify(this.data));
                 //console.log("Data needpassword XXXXXX:" + JSON.stringify(attrdata) + attrdata["needpassword"]);
                 //this.signaturePad = new SignaturePad(this.elementRef);
             }
@@ -177,6 +183,7 @@ div.printborder {
             public InitialList(dstable: any) {
                 for (var item in dstable) {
                     let n: string = item;
+
                     let pos = n.indexOf('.', 0);
                     let ds = n.substring(1, pos);
                     let rep = n.substring(pos + 1, n.length - 1);
@@ -185,7 +192,7 @@ div.printborder {
 
                     this.listobj[sname] = this.af.database.list(s);
                 }
-
+                //console.log("list=" + JSON.stringify(this.listobj));
             }
             private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
                 'minWidth': 0.1,
@@ -195,17 +202,43 @@ div.printborder {
             drawComplete() {
                 // console.log("this.signaturePad" + this.signaturePad);
                 //  console.log("SignaturePad" + SignaturePad );
+                // debugger;
+                // // will be notified of szimek/signature_pad's onEnd event
+                // //console.log("name=" + name);
+                // if (this.spa[0] !== undefined) {
+                //     console.log(this.spa[0].toDataURL());
+                //     this.signed = true;
+                // }
+                // if (this.spa[1] !== undefined) {
+                //     console.log(this.spa[1].toDataURL());
+                //     this.signed = true;
+                // }
 
-                // will be notified of szimek/signature_pad's onEnd event
-                if (this.signaturePad !== undefined) {
-                    console.log(this.signaturePad.toDataURL());
-                    this.signed = true;
-                }
+                this.spa.forEach(function (element) {
+                    if (element !== undefined) {
+                        console.log(element.toDataURL());
+                        //this.signed = true;
+                    }
+                });
+                // console.log("this.sp anem =" + name);
+                // console.log("this.sp =" + JSON.stringify(this.sp[name]));
+                // if (this.sp[name] !== undefined) {
+                //     console.log(this.sp[name].toDataURL());
+                //     this.signed = true;
+                // }
             }
 
             drawStart() {
                 // will be notified of szimek/signature_pad's onBegin event
                 console.log('begin drawing');
+                // if (this.spa[0] !== undefined) {
+                //     console.log(this.spa[0].toDataURL());
+                //     this.signed = true;
+                // }
+                // if (this.spa[1] !== undefined) {
+                //     console.log(this.spa[1].toDataURL());
+                //     this.signed = true;
+                // }
             }
             getlist(ds: string, rep: string): any {
                 return this.listobj[ds + '.' + rep];
