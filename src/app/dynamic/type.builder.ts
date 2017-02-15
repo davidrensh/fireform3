@@ -3,7 +3,7 @@ import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
 import { AngularFire, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2';
-import { SignaturePad } from '../signature-pad'; //'angular2-signaturepad/signature-pad';
+import { SignaturePad } from '../signature-pad'; //'pad/signature-pad';
 //import { SignaturePadModule } from 'angular2-signaturepad';
 import { BrowserModule } from '@angular/platform-browser'
 export interface IHaveDynamicData {

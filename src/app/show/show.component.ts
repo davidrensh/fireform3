@@ -5,7 +5,7 @@ import { COMPILER_PROVIDERS } from '@angular/compiler';
 
 import { IHaveDynamicData, DynamicTypeBuilder } from '../dynamic/type.builder';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-import { SignaturePad } from 'angular2-signaturepad/signature-pad';
+import { SignaturePad } from '../signature-pad';// 'angular2-signaturepad/signature-pad';
 //import { FormBuilder, FormGroup, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { RoleService } from '../role.service';
