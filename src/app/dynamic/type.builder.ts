@@ -3,8 +3,8 @@ import { RuntimeCompiler } from '@angular/compiler';
 
 import { PartsModule } from '../parts/parts.module';
 import { AngularFire, FirebaseObjectObservable, FirebaseListObservable } from 'angularfire2';
-import { SignaturePad } from 'angular2-signaturepad/signature-pad';
-import { SignaturePadModule } from 'angular2-signaturepad';
+import { SignaturePad } from '../signature-pad'; //'angular2-signaturepad/signature-pad';
+//import { SignaturePadModule } from 'angular2-signaturepad';
 import { BrowserModule } from '@angular/platform-browser'
 export interface IHaveDynamicData {
     exdata: any;
@@ -199,12 +199,12 @@ div.printborder {
                 'canvasWidth': 300,
                 'canvasHeight': 80
             };
-            drawComplete() {
+            drawComplete(name) {
                 // console.log("this.signaturePad" + this.signaturePad);
                 //  console.log("SignaturePad" + SignaturePad );
                 // debugger;
                 // // will be notified of szimek/signature_pad's onEnd event
-                // //console.log("name=" + name);
+                console.log("name=" + name);
                 // if (this.spa[0] !== undefined) {
                 //     console.log(this.spa[0].toDataURL());
                 //     this.signed = true;
@@ -213,10 +213,15 @@ div.printborder {
                 //     console.log(this.spa[1].toDataURL());
                 //     this.signed = true;
                 // }
-
+                //console.log("this.element" +  document.getElementById('sig1').innerHTML);// this.elementRef.nativeElement.getElementById("sig1"));
                 this.spa.forEach(function (element) {
-                    if (element !== undefined) {
+                   
+                    let id= element.elementRef.nativeElement.id;
+                    if (element !== undefined && id === name) {
+
                         console.log(element.toDataURL());
+                        //console.log(element.elementRef);
+                        //element.
                         //this.signed = true;
                     }
                 });
@@ -304,11 +309,11 @@ div.printborder {
     }
     protected createComponentModule(componentType: any) {
         @NgModule({
-            imports: [SignaturePadModule,
+            imports: [
                 PartsModule, // there are 'text-editor', 'string-editor'...
             ],
             declarations: [
-                componentType
+               SignaturePad, componentType
             ],
         })
         class RuntimeComponentModule {

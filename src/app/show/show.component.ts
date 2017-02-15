@@ -282,7 +282,7 @@ export class ShowComponent implements AfterViewInit, OnChanges, OnDestroy, OnIni
       console.log("k=" + k);
      // k = "";
       //console.log("tag only a:" + a + " b:" + b + " c:" + c + " d:" + d + e);
-      return `<div id="` + d + `" class="padClass"><signature-pad ` + k + ` [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete()"></signature-pad></div>`;
+      return `<div id="` + d + `" class="padClass"><signature-pad ` + k + ` [options]="signaturePadOptions" (onBeginEvent)="drawStart()" (onEndEvent)="drawComplete('` + d + `')"></signature-pad></div>`;
     });
     return p;
   }
