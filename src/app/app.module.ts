@@ -16,7 +16,7 @@ import { ShowComponent } from './show/show.component';
 import { ApiComponent } from './api/api.component';
 import { routing, appRoutingProviders } from './myrouting/myrouting.component';
 import { SignaturePad } from './signature-pad';// 'angular2-signaturepad';
-import { SignaturePadModule} from 'angular2-signaturepad';
+//import {signature_pad } from 'signature_pad';
 // import { RoleService } from './role.service';
 export const firebaseConfig = {
   apiKey: "AIzaSyDUKlFAFOci3eIKn84YGr4Z1A4fexfyfNg",
@@ -24,12 +24,12 @@ export const firebaseConfig = {
   databaseURL: "https://formaas.firebaseio.com",//dren1117@gmail.com
   storageBucket: "gs://firebase-formaas.appspot.com"
 };
-
+//SignaturePadModule,
 @NgModule({
   declarations: [
    AppComponent,TempeditorComponent, LoaderComponent, ListComponent, ShowComponent, ApiComponent,SignaturePad,
   ],
-  imports: [routing,CKEditorModule,SignaturePadModule,
+  imports: [routing,CKEditorModule,
     BrowserModule,
     CommonModule,
     FormsModule, AngularFireModule.initializeApp(firebaseConfig)
